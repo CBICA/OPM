@@ -1,5 +1,5 @@
-#OPM
-Openslide patch manager: parallel reading/writing of patches.
+# OPM
+### Openslide patch manager: parallel reading/writing of patches.
 
 Installation: 
 ```
