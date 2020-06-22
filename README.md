@@ -1,13 +1,25 @@
 #OPM
 Openslide patch manager: parallel reading/writing of patches.
 
-To run, download, navigate to `src`, and run `python3 example.py`
-
-. <br />
-├── images <br />
-│ &nbsp;&nbsp;&nbsp;&nbsp;└── example_slide.svs <br />
-├── README.md <br /> 
-└── src <br />
-&nbsp;&nbsp;&nbsp;&nbsp;├── example.py <br />
-&nbsp;&nbsp;&nbsp;&nbsp;├── patch_manager.py <br />
-&nbsp;&nbsp;&nbsp;&nbsp;└── patch.py <br />
+Installation: 
+```
+git clone https://github.com/grenkoca/OPM.git
+cd OPM/
+pip install -r requirements.txt
+```
+To try an example:
+```
+cd src/
+python example.py
+```
+By default it generates 100 random patches from the included .svs file. Play with this number as well as the number of parallel threads in example.py (default patches=500, default threads=50)
+```
+.
+├── images
+│   └── example_slide.svs
+├── README.md
+└── src
+    ├── example.py 
+    ├── patch_manager.py
+    └── patch.py 
+````
