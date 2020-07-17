@@ -1,8 +1,8 @@
 import sys
 import time
 import random
-from patch import *
-from patch_manager import *
+from src.patch import *
+from src.patch_manager import *
 import cv2
 import numpy as np
 from skimage.morphology.selem import rectangle
