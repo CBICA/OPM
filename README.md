@@ -17,8 +17,8 @@ By default it generates 500 random patches from the included .svs file. Play wit
 ├── images
 │   └── example_slide.svs
 ├── README.md
+├── example.py
 └── src
-    ├── example.py 
     ├── patch_manager.py
     └── patch.py 
 ````
