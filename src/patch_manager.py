@@ -3,8 +3,10 @@ import concurrent.futures
 from tqdm import tqdm
 from functools import partial
 
-class PatchManager():
+
+class PatchManager:
     """Manager for patches for openslide"""
+
     def __init__(self, filename=None):
         """
         Initialize
@@ -37,7 +39,15 @@ class PatchManager():
         os.makedirs(output_directory, exist_ok=True)
         _save_patch_partial = partial(_save_patch, output_directory=output_directory)
         with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
-            list(tqdm(executor.map(_save_patch_partial, self.patches), total=len(self.patches), unit='pchs'))
+            futures = list(
+                tqdm(
+                    executor.map(_save_patch_partial, self.patches),
+                    total=len(self.patches),
+                    unit="pchs",
+                )
+            )
+        print("done!")
+
 
 def _save_patch(patch, output_directory):
     patch.save(out_dir=output_directory)
