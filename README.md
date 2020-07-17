@@ -9,8 +9,7 @@ pip install -r requirements.txt
 ```
 To try an example:
 ```
-cd src/
-python example.py
+python example.py images/example_slide.svs output/
 ```
 By default it generates 500 random patches from the included .svs file. Play with this number as well as the number of parallel threads in example.py (default patches=500, default threads=50)
 ```
