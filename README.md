@@ -14,11 +14,16 @@ python example.py images/example_slide.svs output/
 By default it detects tissue and extracts 1000 random patches from the included .svs file. Play with this number as well as the number of parallel threads in example.py (default patches=1000, default threads=100)
 ```
 .
-├── images
-│   └── example_slide.svs
-├── README.md
 ├── example.py
+├── images
+│   └── example_slide.svs
+├── README.md
+├── requirements.txt
 └── src
-    ├── patch_manager.py
-    └── patch.py 
+    ├── config.py
+    ├── convert_to_tiff.py
+ `   ├── patch_manager.py
+    ├── patch.py
+    └── utils.py
+
 ````
