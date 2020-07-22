@@ -19,8 +19,7 @@ SHOW_VALID = False
 
 # Overlap option
 ALLOW_OVERLAP = False
-#READ_TYPE = 'random' # Change to 'sequential' for increased effiency
-READ_TYPE = 'sequential' # Change to 'sequential' for increased effiency
+READ_TYPE = 'random' # Change to 'sequential' for increased effiency
 
 # Misc
 WHITE_COLOR = 255
