@@ -2,7 +2,7 @@ import concurrent.futures
 import os
 from functools import partial
 from .patch import Patch
-from .config import PATCH_SIZE, SHOW_MINED
+from .config import PATCH_SIZE, SHOW_MINED, READ_TYPE
 import numpy as np
 import openslide
 from tqdm import tqdm
@@ -68,7 +68,7 @@ class PatchManager:
 
         return self.patches.add(patch)
 
-    def add_random_patch(self, allow_overlap=False):
+    def add_next_patch(self, allow_overlap=False):
         """
         Add patch to manager
         :param patch: Patch object to add to set of patches
@@ -92,13 +92,18 @@ class PatchManager:
                 y_values = np.round(indices[:, 1] * self.valid_mask_scale[1]).astype(int)
                 num_indices = len(indices.ravel()) // 2
                 print("%i indices left " % num_indices, end="\r")
-                choice = np.random.choice(num_indices, 1)
+                if READ_TYPE == 'random':
+                    choice = np.random.choice(num_indices, 1)
+                elif READ_TYPE == 'sequential':
+                    choice = 0
+                else:
+                    print("Unrecognized read type %s" % READ_TYPE)
                 coordinates = np.array([x_values[choice], y_values[choice]]).ravel()
                 patch = Patch(self.path, coordinates, 0, PATCH_SIZE)
 
                 return self.add_patch(patch, allow_overlap)
 
-            except ValueError:
+            except:
                 return False
 
 
@@ -121,11 +126,12 @@ class PatchManager:
         original_valid_mask =self.valid_mask.copy()
         saturated = False
         while n_patches - n_completed > 0 and not saturated:
-            [self.add_random_patch(allow_overlap=allow_overlap) for _ in range(n_patches-n_completed)]
+            [self.add_next_patch(allow_overlap=allow_overlap) for _ in range(n_patches-n_completed)]
             print("")
             if len(self.patches) != n_patches - n_completed:
                 print("Slide has reached saturation: No more non-overlapping patches to be found.\n"
-                              "Change SHOW_MINED in config.py to True to see patch locations.")
+                              "Change SHOW_MINED in config.py to True to see patch locations.\n"
+                              "Alternatively, change READ_TYPE to 'sequentiaal' for greater mining effiency.")
                 saturated = True
 
             if SHOW_MINED:
