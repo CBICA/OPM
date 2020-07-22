@@ -17,6 +17,9 @@ config = {
 SHOW_MINED = False
 SHOW_VALID = False
 
+# Overlap option
+ALLOW_OVERLAP = False
+
 # Misc
 WHITE_COLOR = 255
 SCALE = 8

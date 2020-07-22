@@ -57,5 +57,5 @@ if __name__ == "__main__":
     valid_mask, scale = generate_initial_mask(slide_path, SHOW_VALID)
     manager.set_valid_mask(valid_mask, scale)
     # Save patches releases saves all patches stored in manager, dumps to specified output file
-    manager.save_patches(out_dir, n_patches=1000, allow_overlap=False, n_jobs=NUM_WORKERS)
+    manager.save_patches(out_dir, n_patches=1000, allow_overlap=ALLOW_OVERLAP, n_jobs=NUM_WORKERS)
     print("Total time: {}".format(time.time() - start))

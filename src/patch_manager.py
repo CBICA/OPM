@@ -19,7 +19,6 @@ class PatchManager:
         self.patches = set()
         self.path = filename
         self.slide_dims = openslide.open_slide(self.path).dimensions
-        print(self.slide_dims)
         self.valid_mask = None
         self.mined_mask = None
         self.valid_mask_scale = (0, 0)
