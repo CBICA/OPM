@@ -3,7 +3,7 @@
 
 ## Installation: 
 ```
-git clone https://github.com/grenkoca/OPM.git
+git clone https://github.com/grenkoca/opm/tree/KimLab.git
 cd OPM/
 pip install -r requirements.txt
 ```
@@ -11,7 +11,7 @@ pip install -r requirements.txt
 ## Usage
 To try an example:
 ```
-python example.py images/example_slide.svs output/
+python mine_patches.py images/example_slide.svs output/
 ```
 By default it detects tissue and extracts 1000 random patches from the included .svs file. Play with this number as well as the number of parallel threads in example.py (default patches=1000, default threads=100)
 ## Options
@@ -22,10 +22,15 @@ There are also a handful of useful options:
 
 ... and various other parameters such as patch size, thumbnail/valid mask scale, and masking thresholds.
 
+## Workflow
+OPM follows the following workflow:
+
+<img src="OPM Flowchart.png" alt="Workflow for Open Patch Miner" width="600"/>
+
 ## Project Structure
 ```
 .
-├── example.py
+├── mine_patches.py
 ├── images
 │   └── example_slide.svs
 ├── README.md
