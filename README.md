@@ -3,7 +3,7 @@
 
 ## Installation: 
 ```
-git clone https://github.com/grenkoca/OPM.git -b KimLab
+git clone https://github.com/grenkoca/OPM.git
 cd OPM/
 pip install -r requirements.txt
 ```
