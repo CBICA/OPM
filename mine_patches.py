@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.ndimage import binary_fill_holes
 from PIL import Image
+from functools import partial 
 Image.MAX_IMAGE_PIXELS = None
 
 def generate_initial_mask(slide_path, show_overlay=False):
@@ -34,14 +35,14 @@ def generate_initial_mask(slide_path, show_overlay=False):
     # Get all values with low saturation (gray) or value (darkness), remove
     hsv_mask = HSV_mask(slide_thumbnail)
     final_mask = np.logical_and(hybrid_mask, hsv_mask)
+    final_mask = binary_fill_holes(final_mask)
+    final_mask = diate_and_erode(final_mask)
     if show_overlay:
         overlay = slide_thumbnail.copy()
         overlay[~final_mask] = overlay[~final_mask] // 2
         plt.imshow(overlay)
         plt.show()
-
     return final_mask, real_scale
-
 
 if __name__ == "__main__":
     start = time.time()
@@ -53,9 +54,15 @@ if __name__ == "__main__":
     # Create new instance of slide manager
     manager = PatchManager(slide_path)
 
-    # Randomly generate n coordinates
+    # Generate an initial validity mask
     valid_mask, scale = generate_initial_mask(slide_path, SHOW_VALID)
     manager.set_valid_mask(valid_mask, scale)
+    
+    # Create partial gaussian blur validity check.
+    # This allows us to create methods that only have one argument (the patch) for validity checking.
+    gaussian_blur_check = partial(gaussian_blur, upperlimit=UPPER_LIMIT, lowerlimit=LOWER_LIMIT)
+    manager.add_patch_criteria(gaussian_blur_check)
+
     # Save patches releases saves all patches stored in manager, dumps to specified output file
     manager.save_patches(out_dir, n_patches=1000, allow_overlap=ALLOW_OVERLAP, n_jobs=NUM_WORKERS)
     print("Total time: {}".format(time.time() - start))

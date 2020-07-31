@@ -55,8 +55,9 @@ def HSV_mask(image):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
     return ~np.logical_or(hsv_image[:,:,2] < HSV_MASK_V_THRESHOLD, hsv_image[:,:,1] < HSV_MASK_S_THRESHOLD)
 
-def gaussian_blur(img, patch_size, upperlimit, lowerlimit):
+def gaussian_blur(img, upperlimit, lowerlimit):
     try:
+        patch_size = img.size
         img = np.asarray(img)
         if img.shape[0] < patch_size[0] or img.shape[1] < patch_size[1]:
             return False

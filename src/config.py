@@ -9,13 +9,12 @@ config = {
         'white_color' : 255,
         'scale' : 8
     }
-
 }
 
 
 # Visualization and debugging
 SHOW_MINED = True
-SHOW_VALID = False
+SHOW_VALID = True
 
 # Overlap option
 ALLOW_OVERLAP = False
@@ -28,7 +27,7 @@ PATCH_SIZE = (256, 256)
 NUM_WORKERS = 100
 
 # Gaussian Filtering
-UPPPER_LIMIT = 290000
+UPPER_LIMIT = 290000
 LOWER_LIMIT = 1500
 GAUSSIAN_KERNEL_SIZE = 65
 GAUSSIAN_KERNEL_SIGMA = 16
@@ -39,7 +38,7 @@ MINIMUM_COLOR_DIFFERENCE = 30
 BGR_RED_CHANNEL = 2
 BGR_GREEN_CHANNEL = 1
 BGR_BLUE_CHANNEL = 0
-PEN_MASK_EXPANSION = 7
+PEN_MASK_EXPANSION = 9
 
 # HSV Masking
 HSV_MASK_S_THRESHOLD = 15

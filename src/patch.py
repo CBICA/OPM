@@ -4,8 +4,9 @@ from .utils import *
 
 
 class Patch:
-    def __init__(self, slide_path, coordinates, level, size):
-        self.slide_path = slide_path
+    def __init__(self, manager, coordinates, level, size):
+        self.manager = manager
+        self.slide_path = manager.path
         self.coordinates = coordinates
         self.level = level
         self.size = size
@@ -23,15 +24,16 @@ class Patch:
         :return:
         """
         patch = self.read_patch()
-        is_viable = gaussian_blur(patch, patch.size, UPPPER_LIMIT, LOWER_LIMIT)
-        if is_viable:
-            path = Path(self.slide_path)
-            self.read_patch().save(
-                fp=out_dir
-                   + path.name.split(path.suffix)[0]
-                   + output_format.format(self.coordinates[0], self.coordinates[1], self.size[0], self.size[1]),
-                format="PNG",
-            )
-            return True
-        else:
-            return False
+
+        for check_function in self.manager.valid_patch_checks:
+            if not check_function(patch):
+                return False
+
+        path = Path(self.slide_path)
+        self.read_patch().save(
+            fp=out_dir
+               + path.name.split(path.suffix)[0]
+               + output_format.format(self.coordinates[0], self.coordinates[1], self.size[0], self.size[1]),
+            format="PNG",
+        )
+        return True
