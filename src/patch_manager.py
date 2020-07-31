@@ -45,13 +45,13 @@ class PatchManager:
         TODO: test hashing to ensure same patch won't be added
         """
         try:
-            if OVERLAP_FACTOR != 0 and self.valid_mask is None:
+            if OVERLAP_FACTOR != 1 and self.valid_mask is None:
                 print("OVERLAP_FACTOR can only be not one if valid_mask is set.")
                 exit(1)
-            inverse_overlap_factor = 1 - OVERLAP_FACTOR
+            inverse_overlap_factor = 1-OVERLAP_FACTOR
             valid_start_x = int(round((patch.coordinates[0] - int(round((PATCH_SIZE[0] + 1) * inverse_overlap_factor)))/self.valid_mask_scale[0]))
             valid_start_y = int(round((patch.coordinates[1] - int(round((PATCH_SIZE[1] + 1) * inverse_overlap_factor)))/self.valid_mask_scale[1]))
-            if OVERLAP_FACTOR != 0:
+            if OVERLAP_FACTOR != 1:
                 valid_end_x = int(round((patch.coordinates[0] + int(round(PATCH_SIZE[0] * inverse_overlap_factor))) / self.valid_mask_scale[0]))
                 valid_end_y = int(round((patch.coordinates[1] + int(round(PATCH_SIZE[1] * inverse_overlap_factor))) / self.valid_mask_scale[1]))
                 self.valid_mask[

@@ -18,7 +18,7 @@ SHOW_VALID = False
 
 # Overlap option
 READ_TYPE = 'random'  # Change to 'sequential' for increased effiency
-OVERLAP_FACTOR = 0.9 # Portion of patches that are allowed to overlap (0-1) 
+OVERLAP_FACTOR = 0 # Portion of patches that are allowed to overlap (0-1) 
 
 # Misc
 WHITE_COLOR = 255
