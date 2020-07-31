@@ -14,11 +14,11 @@ config = {
 
 # Visualization and debugging
 SHOW_MINED = True
-SHOW_VALID = True
+SHOW_VALID = False
 
 # Overlap option
-ALLOW_OVERLAP = False
-READ_TYPE = 'random' # Change to 'sequential' for increased effiency
+READ_TYPE = 'random'  # Change to 'sequential' for increased effiency
+OVERLAP_FACTOR = 0.9 # Portion of patches that are allowed to overlap (0-1) 
 
 # Misc
 WHITE_COLOR = 255

@@ -2,7 +2,7 @@ import concurrent.futures
 import os
 from functools import partial
 from .patch import Patch
-from .config import PATCH_SIZE, SHOW_MINED, READ_TYPE
+from .config import PATCH_SIZE, SHOW_MINED, READ_TYPE, OVERLAP_FACTOR
 import numpy as np
 import openslide
 from tqdm import tqdm
@@ -37,7 +37,7 @@ class PatchManager:
         self.mined_mask = np.zeros_like(mask)
         self.valid_mask_scale = scale
 
-    def add_patch(self, patch, allow_overlap=False):
+    def add_patch(self, patch):
         """
         Add patch to manager
         :param patch: Patch object to add to set of patches
@@ -45,15 +45,15 @@ class PatchManager:
         TODO: test hashing to ensure same patch won't be added
         """
         try:
-            if not allow_overlap and self.valid_mask is None:
-                print("allow_overlap can only true if valid_mask is set.")
+            if OVERLAP_FACTOR != 0 and self.valid_mask is None:
+                print("OVERLAP_FACTOR can only be not one if valid_mask is set.")
                 exit(1)
-
-            valid_start_x = int(round((patch.coordinates[0] - PATCH_SIZE[0] + 1)/self.valid_mask_scale[0]))
-            valid_start_y = int(round((patch.coordinates[1] - PATCH_SIZE[1] + 1)/self.valid_mask_scale[1]))
-            if not allow_overlap:
-                valid_end_x = int(round((patch.coordinates[0] + PATCH_SIZE[0]) / self.valid_mask_scale[0]))
-                valid_end_y = int(round((patch.coordinates[1] + PATCH_SIZE[1]) / self.valid_mask_scale[1]))
+            inverse_overlap_factor = 1 - OVERLAP_FACTOR
+            valid_start_x = int(round((patch.coordinates[0] - int(round((PATCH_SIZE[0] + 1) * inverse_overlap_factor)))/self.valid_mask_scale[0]))
+            valid_start_y = int(round((patch.coordinates[1] - int(round((PATCH_SIZE[1] + 1) * inverse_overlap_factor)))/self.valid_mask_scale[1]))
+            if OVERLAP_FACTOR != 0:
+                valid_end_x = int(round((patch.coordinates[0] + int(round(PATCH_SIZE[0] * inverse_overlap_factor))) / self.valid_mask_scale[0]))
+                valid_end_y = int(round((patch.coordinates[1] + int(round(PATCH_SIZE[1] * inverse_overlap_factor))) / self.valid_mask_scale[1]))
                 self.valid_mask[
                     self.min_bound_check(valid_start_x):self.width_bound_check(valid_end_x),
                     self.min_bound_check(valid_start_y):self.height_bound_check(valid_end_y)
@@ -74,10 +74,11 @@ class PatchManager:
             self.patches.append(patch)
             return True
 
-        except:
+        except Exception as e:
+            print(e)
             return False
 
-    def add_next_patch(self, allow_overlap=False):
+    def add_next_patch(self):
         """
         Add patch to manager
         :param patch: Patch object to add to set of patches
@@ -90,7 +91,7 @@ class PatchManager:
             y_value = np.random.choice(self.slide_dims[1], 1)
             coordinates = np.array([x_value, y_value])
             patch = Patch(self, coordinates, 0, PATCH_SIZE)
-            return self.add_patch(patch, allow_overlap)
+            return self.add_patch(patch)
 
         else:
             # Find indices on filled mask, then multiply by real scale to get actual coordinates
@@ -111,7 +112,7 @@ class PatchManager:
                 coordinates = np.array([x_values[choice], y_values[choice]]).ravel()
                 patch = Patch(self, coordinates, 0, PATCH_SIZE)
 
-                return self.add_patch(patch, allow_overlap)
+                return self.add_patch(patch)
             except:
                 return False
 
@@ -131,7 +132,7 @@ class PatchManager:
     def add_patch_criteria(self, patch_validity_check):
         self.valid_patch_checks.append(patch_validity_check)
 
-    def save_patches(self, output_directory, n_patches, allow_overlap=False, n_jobs=40):
+    def save_patches(self, output_directory, n_patches, n_jobs=40):
         os.makedirs(output_directory, exist_ok=True)
         _save_patch_partial = partial(_save_patch, output_directory=output_directory)
         n_completed = 0
@@ -140,7 +141,7 @@ class PatchManager:
         while n_patches - n_completed > 0 and not saturated:
             could_not_add_flag = False
             for _ in range(n_patches-n_completed):
-                if not self.add_next_patch(allow_overlap=allow_overlap):
+                if not self.add_next_patch():
                     could_not_add_flag = True
                     print("\nCould not add new patch, breaking.")
                     break

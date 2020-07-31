@@ -42,4 +42,8 @@ OPM follows the following workflow:
     ├── patch.py
     └── utils.py
 
-````
+```
+
+## Changelog
+Jul. 31, 2020:
+- Changed `ALLOW_OVERLAP` to `OVERLAP_FACTOR`. `OVERLAP_FACTOR` is a float from 0 to 1 that is the portion of patches that are allowed to overlap. If 0, there is no overlap allowed. If 1, they are totally allowed to overlap (except for the origin pixel). 
