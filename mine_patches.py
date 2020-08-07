@@ -1,6 +1,7 @@
 import sys
 import time
 import random
+import argparse
 from src.patch import *
 from src.patch_manager import *
 from src.utils import *
@@ -55,8 +56,8 @@ if __name__ == '__main__':
     parser.add_argument('-tm', '--tissue_mask_path',
                         dest='tissue_mask_path',
                         help="input path for the tissue mask")
-    parser.add_argument('-lm', '--label_mask_path',
-                        dest='label_mask_path',
+    parser.add_argument('-am', '--annotation_mask_path',
+                        dest='annotation_mask_path',
                         help="input path for the label mask")
     parser.add_argument('-o', '--output_path',
                         dest='output_path',
