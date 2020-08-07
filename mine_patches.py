@@ -10,6 +10,7 @@ from scipy.ndimage import binary_fill_holes
 from PIL import Image
 from functools import partial 
 Image.MAX_IMAGE_PIXELS = None
+from pathlib import Path
 
 def generate_initial_mask(slide_path, show_overlay=False):
     """
@@ -44,11 +45,54 @@ def generate_initial_mask(slide_path, show_overlay=False):
         plt.show()
     return final_mask, real_scale
 
-if __name__ == "__main__":
-    start = time.time()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-i', '--input_path',
+                        dest='input_path',
+                        help="input path for the tissue",
+                        required=True)
+    parser.add_argument('-tm', '--tissue_mask_path',
+                        dest='tissue_mask_path',
+                        help="input path for the tissue mask")
+    parser.add_argument('-lm', '--label_mask_path',
+                        dest='label_mask_path',
+                        help="input path for the label mask")
+    parser.add_argument('-o', '--output_path',
+                        dest='output_path',
+                        help="output path for the patches")
+    parser.add_argument('-lm', '--landmarks_path',
+                        dest='landmarks_path',
+                        help="output path for the coordinates"+\
+                             "of the patches stored")
+    parser.add_argument('-t', '--threads',
+                        dest='threads',
+                        help="number of threads, by default will use all")
+    args = parser.parse_args()
     # Path to openslide supported file (.svs, .tiff, etc.)
-    slide_path = sys.argv[1]
-    out_dir = sys.argv[2]
+    slide_path = os.path.abspath(args.input_path)
+
+    if not os.path.exists(slide_path):
+        raise ValueError("Could not find the slide, could you recheck the path?")
+
+    if args.output_path is not None:
+        if not os.path.exists(args.output_path):
+            print("Output Directory does not exist, we are creating one for you.")
+            Path(args.output_path).mkdir(parents=True, exist_ok=True)
+
+    if args.landmarks_path is not None:
+        if not os.path.exists(args.landmarks_path):
+            print("Landmarks Directory does not exist, we are creating one for you.")
+            Path(args.output_path).mkdir(parents=True, exist_ok=True)
+
+    if args.output_path is None and args.landmarks_path is None:
+        raise ValueError("Please atleast give output_path or landmarks_path")
+
+    if args.tissue_mask_path is None:
+        print("Tissue Mask is was not provided. We are creating one for you.")
+    if args.label_mask_path is None:
+        print("No label Mask was provided. Using Tissue Mask for extraction.")
+    out_dir = os.path.abspath(args.output_path)
     if not out_dir.endswith("/"):
         out_dir += "/"
     # Create new instance of slide manager
