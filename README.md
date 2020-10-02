@@ -3,7 +3,7 @@
 
 ## Installation: 
 ```
-git clone https://github.com/grenkoca/OPM.git -b KimLab
+git clone https://github.com/grenkoca/OPM.git
 cd OPM/
 pip install -r requirements.txt
 ```
@@ -25,7 +25,7 @@ There are also a handful of useful options:
 ## Workflow
 OPM follows the following workflow:
 
-<img src="OPM Flowchart.png" alt="Workflow for Open Patch Miner" width="600"/>
+<img src="images/opm_flowchart.png" alt="Workflow for Open Patch Miner" width="600"/>
 
 ## Project Structure
 ```
