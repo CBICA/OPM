@@ -129,5 +129,5 @@ if __name__ == '__main__':
         manager.save_patches(out_dir, n_patches=1000, output_csv=args.output_csv, n_jobs=NUM_WORKERS, save=do_save_patches)
         print("Total time: {}".format(time.time() - start))
     else:
-        manager.saved_defined_patches(out_dir, patch_coord_csv=args.input_csv)
+        manager.save_predefined_patches(out_dir, patch_coord_csv=args.input_csv)
 

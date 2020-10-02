@@ -201,7 +201,7 @@ class PatchManager:
         output.close()
         print("Done!")
 
-    def saved_defined_patches(self, output_directory, patch_coord_csv, n_jobs=40):
+    def save_predefined_patches(self, output_directory, patch_coord_csv, n_jobs=40):
         # Todo, port to pandas or something more sophisticated?
         with open(patch_coord_csv, "r") as input_csv:
             for line in input_csv:
@@ -221,7 +221,7 @@ class PatchManager:
                 )
             )
             self.patches = list()
-            successful = np.count_nonzero(np.array(futures))
+            successful = np.count_nonzero(np.array(futures) == True)
             print("{} valid patches found.".format(successful))
 
 
