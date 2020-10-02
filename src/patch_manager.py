@@ -2,7 +2,7 @@ import concurrent.futures
 import os
 from functools import partial
 from .patch import Patch
-from .config import PATCH_SIZE, SHOW_MINED, READ_TYPE, OVERLAP_FACTOR
+from .config import PATCH_SIZE, SHOW_MINED, SHOW_VALID, READ_TYPE, OVERLAP_FACTOR
 import numpy as np
 import openslide
 from tqdm import tqdm
@@ -23,6 +23,7 @@ class PatchManager:
         self.mined_mask = None
         self.valid_mask_scale = (0, 0)
         self.valid_patch_checks = []
+        self.openslide_mask_path = None
 
     def set_slide_path(self, filename):
         """
@@ -31,12 +32,15 @@ class PatchManager:
         :return: None
         """
         self.path = filename
-
+    
+    def set_openslide_mask(self, path):
+        self.openslide_mask_path = path
+    
     def set_valid_mask(self, mask, scale=(1,1)):
         self.valid_mask = mask
         self.mined_mask = np.zeros_like(mask)
         self.valid_mask_scale = scale
-
+    
     def add_patch(self, patch):
         """
         Add patch to manager
@@ -132,11 +136,20 @@ class PatchManager:
     def add_patch_criteria(self, patch_validity_check):
         self.valid_patch_checks.append(patch_validity_check)
 
-    def save_patches(self, output_directory, n_patches, n_jobs=40):
-        os.makedirs(output_directory, exist_ok=True)
-        _save_patch_partial = partial(_save_patch, output_directory=output_directory)
+    def save_patches(self, output_directory, n_patches, output_csv=None, n_jobs=40, save=True):
+        if save:
+            os.makedirs(output_directory, exist_ok=True)
+        if output_csv is not None:
+            print("Creating output csv")
+            output = open(output_csv, "w")
+            output.write("Patch_X, Patch_Y\n")
+
+        if SHOW_VALID:
+            plt.imshow(self.valid_mask)
+            plt.show()
+        
+        _save_patch_partial = partial(_save_patch, output_directory=output_directory, save=save)
         n_completed = 0
-        original_valid_mask =self.valid_mask.copy()
         saturated = False
         while n_patches - n_completed > 0 and not saturated:
             could_not_add_flag = False
@@ -145,6 +158,7 @@ class PatchManager:
                     could_not_add_flag = True
                     print("\nCould not add new patch, breaking.")
                     break
+
             if not could_not_add_flag:
                 print("") # Fixes spacing in case it breaks. Inelegant but I'll fix later
 
@@ -163,8 +177,6 @@ class PatchManager:
                 overlay[~self.mined_mask] = overlay[~self.mined_mask] // 2
                 plt.imshow(overlay)
                 plt.show()
-                plt.imshow(original_valid_mask)
-                plt.show()
 
             with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
                 futures = list(
@@ -175,12 +187,43 @@ class PatchManager:
                     )
                 )
                 self.patches = list()
-                successful = np.count_nonzero(np.array(futures))
+                np_futures_array = np.array(futures)
+                successful_indices = np.argwhere(np_futures_array[:,0] == True)
+                unsuccessful_indices = np.argwhere(np_futures_array[:,0] == False)
+                successful = np.count_nonzero(np.array(futures) == True)
                 print("{}/{} valid patches found in this run.".format(successful, n_patches))
                 n_completed += successful
+                if output_csv is not None:
+                    for index in successful_indices:
+                        coords = np_futures_array[:,1][index][0].coordinates
+                        output.write("{},{}\n".format(coords[0], coords[1]))
 
+        output.close()
         print("Done!")
 
+    def saved_defined_patches(self, output_directory, patch_coord_csv, n_jobs=40):
+        # Todo, port to pandas or something more sophisticated?
+        with open(patch_coord_csv, "r") as input_csv:
+            for line in input_csv:
+                try:
+                    x, y = [int(val) for val in line.split(",")]
+                    _save_patch_partial = partial(_save_patch, output_directory=output_directory, save=True)
+                    patch = Patch(self, (x, y), 0, PATCH_SIZE)
+                    self.patches.append(patch)
+                except:
+                    pass
+        with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
+            futures = list(
+                tqdm(
+                    executor.map(_save_patch_partial, self.patches),
+                    total=len(self.patches),
+                    unit="pchs",
+                )
+            )
+            self.patches = list()
+            successful = np.count_nonzero(np.array(futures))
+            print("{} valid patches found.".format(successful))
 
-def _save_patch(patch, output_directory):
-    return patch.save(out_dir=output_directory)
+
+def _save_patch(patch, output_directory, save):
+    return patch.save(out_dir=output_directory, save=save)
