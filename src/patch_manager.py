@@ -3,10 +3,12 @@ import os
 from functools import partial
 from .patch import Patch
 from .config import PATCH_SIZE, SHOW_MINED, SHOW_VALID, READ_TYPE, OVERLAP_FACTOR
+from .utils import display_overlay
 import numpy as np
 import openslide
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+
 
 class PatchManager:
     """Manager for patches for openslide"""
@@ -32,15 +34,15 @@ class PatchManager:
         :return: None
         """
         self.path = filename
-    
+
     def set_openslide_mask(self, path):
         self.openslide_mask_path = path
-    
-    def set_valid_mask(self, mask, scale=(1,1)):
+
+    def set_valid_mask(self, mask, scale=(1, 1)):
         self.valid_mask = mask
         self.mined_mask = np.zeros_like(mask)
         self.valid_mask_scale = scale
-    
+
     def add_patch(self, patch):
         """
         Add patch to manager
@@ -52,18 +54,27 @@ class PatchManager:
             if OVERLAP_FACTOR != 1 and self.valid_mask is None:
                 print("OVERLAP_FACTOR can only be not one if valid_mask is set.")
                 exit(1)
-            inverse_overlap_factor = 1-OVERLAP_FACTOR
-            valid_start_x = int(round((patch.coordinates[0] - int(round((PATCH_SIZE[0] + 1) * inverse_overlap_factor)))/self.valid_mask_scale[0]))
-            valid_start_y = int(round((patch.coordinates[1] - int(round((PATCH_SIZE[1] + 1) * inverse_overlap_factor)))/self.valid_mask_scale[1]))
+            inverse_overlap_factor = 1 - OVERLAP_FACTOR
+            valid_start_x = int(round(
+                (patch.coordinates[0] - int(round((PATCH_SIZE[0] + 1) * inverse_overlap_factor))) /
+                self.valid_mask_scale[0]))
+            valid_start_y = int(round(
+                (patch.coordinates[1] - int(round((PATCH_SIZE[1] + 1) * inverse_overlap_factor))) /
+                self.valid_mask_scale[1]))
             if OVERLAP_FACTOR != 1:
-                valid_end_x = int(round((patch.coordinates[0] + int(round(PATCH_SIZE[0] * inverse_overlap_factor))) / self.valid_mask_scale[0]))
-                valid_end_y = int(round((patch.coordinates[1] + int(round(PATCH_SIZE[1] * inverse_overlap_factor))) / self.valid_mask_scale[1]))
+                valid_end_x = int(round(
+                    (patch.coordinates[0] + int(round(PATCH_SIZE[0] * inverse_overlap_factor))) / self.valid_mask_scale[
+                        0]))
+                valid_end_y = int(round(
+                    (patch.coordinates[1] + int(round(PATCH_SIZE[1] * inverse_overlap_factor))) / self.valid_mask_scale[
+                        1]))
                 self.valid_mask[
-                    self.min_bound_check(valid_start_x):self.width_bound_check(valid_end_x),
-                    self.min_bound_check(valid_start_y):self.height_bound_check(valid_end_y)
+                self.min_bound_check(valid_start_x):self.width_bound_check(valid_end_x),
+                self.min_bound_check(valid_start_y):self.height_bound_check(valid_end_y)
                 ] = False
             else:
-                self.valid_mask[valid_start_x, valid_start_y] = False # Change only the starting index to prevent calling the same patch
+                self.valid_mask[
+                    valid_start_x, valid_start_y] = False  # Change only the starting index to prevent calling the same patch
 
             mined_start_x = int(round((patch.coordinates[0]) / self.valid_mask_scale[0]))
             mined_start_y = int(round((patch.coordinates[1]) / self.valid_mask_scale[1]))
@@ -120,7 +131,6 @@ class PatchManager:
             except:
                 return False
 
-
     def remove_patch(self, patch):
         return self.patches.remove(patch)
 
@@ -143,40 +153,56 @@ class PatchManager:
             print("Creating output csv")
             output = open(output_csv, "w")
             output.write("Patch_X, Patch_Y\n")
+        if n_patches == -1:
+            n_patches = np.Inf
 
         if SHOW_VALID:
-            plt.imshow(self.valid_mask)
-            plt.show()
-        
+            slide = openslide.open_slide(self.path)
+            slide_thumbnail = np.asarray(
+                slide.get_thumbnail((self.slide_dims[0] // int(self.valid_mask_scale[0]),
+                                     self.slide_dims[1] // int(self.valid_mask_scale[1]))))
+
+            display_overlay(slide_thumbnail, self.valid_mask)
+
         _save_patch_partial = partial(_save_patch, output_directory=output_directory, save=save)
         n_completed = 0
         saturated = False
         while n_patches - n_completed > 0 and not saturated:
-            could_not_add_flag = False
-            for _ in range(n_patches-n_completed):
-                if not self.add_next_patch():
-                    could_not_add_flag = True
-                    print("\nCould not add new patch, breaking.")
-                    break
+            # If there is a patch quota given...
+            if n_patches != np.Inf:
+                # Generate feasible patches until quota is reached or error is raised
+                for _ in range(n_patches - n_completed):
+                    if not self.add_next_patch():
+                        print("\nCould not add new patch, breaking.")
+                        break
+                else:
+                    print("")  # Fixes spacing in case it breaks. Inelegant but I'll fix later
+                # If the quota is not met, it means the slide is saturated
+                if len(self.patches) != n_patches - n_completed:
+                    print("Slide has reached saturation: No more non-overlapping patches to be found.\n"
+                          "Change SHOW_MINED in config.py to True to see patch locations.\n"
+                          "Alternatively, change READ_TYPE to 'sequential' for greater mining effiency.")
+                    saturated = True
+            # If there is no patch quota given, add patches until saturation.
+            else:
+                while True:
+                    if not self.add_next_patch():
+                        print("\nCould not add new patch, breaking.")
+                        break
 
-            if not could_not_add_flag:
-                print("") # Fixes spacing in case it breaks. Inelegant but I'll fix later
-
-            if len(self.patches) != n_patches - n_completed:
-                print("Slide has reached saturation: No more non-overlapping patches to be found.\n"
-                              "Change SHOW_MINED in config.py to True to see patch locations.\n"
-                              "Alternatively, change READ_TYPE to 'sequential' for greater mining effiency.")
-                saturated = True
+                if len(self.patches) != n_patches - n_completed:
+                    print("Slide has reached saturation: No more non-overlapping patches to be found.\n"
+                          "Change SHOW_MINED in config.py to True to see patch locations.\n"
+                          "Alternatively, change READ_TYPE to 'sequential' for greater mining effiency.")
+                    saturated = True
 
             if SHOW_MINED:
                 slide = openslide.open_slide(self.path)
-                slide_thumbnail = np.asarray(slide.get_thumbnail((self.slide_dims[0] // int(self.valid_mask_scale[0]),
-                    self.slide_dims[1]//int(self.valid_mask_scale[1]))))
-                overlay = slide_thumbnail.copy()
+                slide_thumbnail = np.asarray(
+                    slide.get_thumbnail((self.slide_dims[0] // int(self.valid_mask_scale[0]),
+                                         self.slide_dims[1] // int(self.valid_mask_scale[1]))))
 
-                overlay[~self.mined_mask] = overlay[~self.mined_mask] // 2
-                plt.imshow(overlay)
-                plt.show()
+                display_overlay(slide_thumbnail, self.mined_mask)
 
             with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
                 futures = list(
@@ -186,19 +212,24 @@ class PatchManager:
                         unit="pchs",
                     )
                 )
+
                 self.patches = list()
                 np_futures_array = np.array(futures)
-                successful_indices = np.argwhere(np_futures_array[:,0] == True)
-                unsuccessful_indices = np.argwhere(np_futures_array[:,0] == False)
-                successful = np.count_nonzero(np.array(futures) == True)
+
+                successful_indices = np.argwhere(np_futures_array[:, 0])
+                unsuccessful_indices = np.argwhere(np_futures_array[:, 0])
+
+                successful = np.count_nonzero(successful_indices)
                 print("{}/{} valid patches found in this run.".format(successful, n_patches))
                 n_completed += successful
+
                 if output_csv is not None:
                     for index in successful_indices:
-                        coords = np_futures_array[:,1][index][0].coordinates
+                        coords = np_futures_array[:, 1][index][0].coordinates
                         output.write("{},{}\n".format(coords[0], coords[1]))
 
-        output.close()
+        if output_csv is not None:
+            output.close()
         print("Done!")
 
     def save_predefined_patches(self, output_directory, patch_coord_csv, n_jobs=40):

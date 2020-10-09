@@ -1,19 +1,17 @@
-import sys
 import time
-import random
 import argparse
-from src.patch import *
 from src.patch_manager import *
 from src.utils import *
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.ndimage import binary_fill_holes
 from PIL import Image
 from functools import partial 
 Image.MAX_IMAGE_PIXELS = None
 from pathlib import Path
+import warnings
+warnings.simplefilter("ignore")
 
-def generate_initial_mask(slide_path, show_overlay=False):
+
+def generate_initial_mask(slide_path):
     """
     Helper method to generate random coordinates within a slide
     :param slide_path: Path to slide (str)
@@ -27,30 +25,10 @@ def generate_initial_mask(slide_path, show_overlay=False):
     # Call thumbnail for effiency, calculate scale relative to whole slide
     slide_thumbnail = np.asarray(slide.get_thumbnail((slide_dims[0]//SCALE, slide_dims[1]//SCALE)))
     real_scale = (slide_dims[0]/slide_thumbnail.shape[1], slide_dims[1]/slide_thumbnail.shape[0])
-    # Mask out whitespace
-    thumb_whitespace_mask = whitespace_mask(slide_thumbnail)
-    thumb_whitespace_mask = binary_fill_holes(thumb_whitespace_mask)
-    thumb_whitespace_mask = diate_and_erode(thumb_whitespace_mask)
-    # Remove pixels above G/B color difference threshold
-    thumb_pen_mask = pen_mask(slide_thumbnail)
-    hybrid_mask = np.logical_and(thumb_whitespace_mask, thumb_pen_mask)
-    
-    hsv_mask = HSV_mask(slide_thumbnail)
 
-    final_mask = np.logical_and(hsv_mask, hybrid_mask)
-    final_mask = binary_fill_holes(final_mask)
-    final_mask = diate_and_erode(final_mask)
 
-    return final_mask, real_scale
+    return tissue_mask(slide_thumbnail), real_scale
 
-def generate_initial_mask_binary(slide_path):
-    slide = openslide.open_slide(slide_path)
-    slide_dims = slide.dimensions
-
-    # Call thumbnail for effiency, calculate scale relative to whole slide
-    slide_thumbnail = np.asarray(slide.get_thumbnail((slide_dims[0]//SCALE, slide_dims[1]//SCALE)))
-    real_scale = (slide_dims[0]/slide_thumbnail.shape[1], slide_dims[1]/slide_thumbnail.shape[0])
-    return cv2.cvtColor(slide_thumbnail, cv2.COLOR_RGB2GRAY) > 0, real_scale
 
 if __name__ == '__main__':
     start = time.time()
@@ -59,6 +37,12 @@ if __name__ == '__main__':
     parser.add_argument('-i', '--input_path',
                         dest='input_path',
                         help="input path for the tissue",
+                        required=True)
+    parser.add_argument('-n', '--num_patches',
+                        type=int,
+                        default=1000,
+                        dest='num_patches',
+                        help="Number of patches to mine. Set to -1 to mine until saturation. ",
                         required=True)
     parser.add_argument('-tm', '--tissue_mask_path',
                         dest='tissue_mask_path',
@@ -121,12 +105,18 @@ if __name__ == '__main__':
         # Generate an initial validity mask
         mask, scale = generate_initial_mask(args.input_path)
         print("Setting valid mask...")
-        plt.imshow(mask)
-        plt.show()
         manager.set_valid_mask(mask, scale)
-        manager.set_openslide_mask = args.annotation_mask_path
+
+        # Reject patch if any pixels are transparent
+        manager.add_patch_criteria(alpha_channel_check)
+        # Reject patch if image dimensions are not equal to PATCH_SIZE
+        patch_dims_check = partial(patch_size_check, patch_height=PATCH_SIZE[0], patch_width=PATCH_SIZE[1])
+        manager.add_patch_criteria(patch_dims_check)
+        # Reject patch if summed difference of Gaussians is not within acceptable margins
+        dog_check = partial(difference_of_gauss_check, upperlimit=UPPER_LIMIT, lowerlimit=LOWER_LIMIT)
+        manager.add_patch_criteria(dog_check)
         # Save patches releases saves all patches stored in manager, dumps to specified output file
-        manager.save_patches(out_dir, n_patches=1000, output_csv=args.output_csv, n_jobs=NUM_WORKERS, save=do_save_patches)
+        manager.save_patches(out_dir, n_patches=args.num_patches, output_csv=args.output_csv, n_jobs=NUM_WORKERS, save=do_save_patches)
         print("Total time: {}".format(time.time() - start))
     else:
         manager.save_predefined_patches(out_dir, patch_coord_csv=args.input_csv)
