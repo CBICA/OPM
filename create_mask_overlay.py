@@ -6,7 +6,7 @@ from PIL import Image
 from pathlib import Path
 from skimage.io import imsave
 from src.config import SCALE
-from src.utils import tissue_mask
+from src.utils import tissue_mask_2, hue_range_mask
 Image.MAX_IMAGE_PIXELS = None
 
 warnings.simplefilter('ignore')
@@ -31,7 +31,7 @@ def generate_initial_mask(slide_path):
 
     # Call thumbnail for effiency, calculate scale relative to whole slide
     slide_thumbnail = np.asarray(slide.get_thumbnail((slide_dims[0]//SCALE, slide_dims[1]//SCALE)))
-    return slide_thumbnail, tissue_mask(slide_thumbnail)
+    return slide_thumbnail, tissue_mask_2(slide_thumbnail)
 
 
 if __name__ == "__main__":

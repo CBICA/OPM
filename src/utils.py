@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from skimage.filters.rank import maximum, minimum
-from skimage.filters import threshold_otsu, median
+from skimage.filters import threshold_otsu, median, gaussian
 from skimage.morphology.selem import rectangle, disk
 from skimage.morphology import remove_small_objects, remove_small_holes
 from skimage.util import img_as_ubyte
@@ -37,6 +37,16 @@ def display_overlay(image, mask):
     plt.show()
 
 
+def hue_range_mask(image, min_hue, max_hue, sat_min=0.05):
+    hsv_image = rgb2hsv(image)
+    h_channel = gaussian(hsv_image[:, :, HSV_HUE_CHANNEL])
+    above_min = h_channel > min_hue
+    below_max = h_channel < max_hue
+
+    s_channel = gaussian(hsv_image[:, :, HSV_SAT_CHANNEL])
+    above_sat = s_channel > sat_min
+    return np.logical_and(np.logical_and(above_min, below_max), above_sat)
+
 def tissue_mask(image):
     hsv_image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
     high_pass_saturation = high_pass_isolation_filter(hsv_image[:, :, 1])
@@ -44,12 +54,20 @@ def tissue_mask(image):
     sat_val_mask = np.abs(high_pass_saturation + high_pass_value)
 
     cropped = border_crop(sat_val_mask, fx=0.025, fy=0.025)
+    plt.imshow(cropped)
+    plt.show()
     thresholded_sat_val_mask = cropped >= threshold_otsu(cropped)
-    filled = remove_small_holes(thresholded_sat_val_mask, PEN_SIZE_THRESHOLD**2)
+    filled = remove_small_holes(thresholded_sat_val_mask, PEN_SIZE_THRESHOLD)
     pruned = remove_small_objects(filled, PEN_SIZE_THRESHOLD)
     pen_markings = basic_pen_mask(image)
     final_mask = pruned.copy()
     final_mask[pen_markings] = False
+    return final_mask
+
+
+def tissue_mask_2(image):
+    hue_mask = hue_range_mask(image, 0.8, 0.95)
+    final_mask = remove_small_holes(hue_mask)
     return final_mask
 
 

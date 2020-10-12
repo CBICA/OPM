@@ -27,7 +27,7 @@ def generate_initial_mask(slide_path):
     real_scale = (slide_dims[0]/slide_thumbnail.shape[1], slide_dims[1]/slide_thumbnail.shape[0])
 
 
-    return tissue_mask(slide_thumbnail), real_scale
+    return tissue_mask_2(slide_thumbnail), real_scale
 
 
 if __name__ == '__main__':
