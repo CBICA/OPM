@@ -16,7 +16,7 @@ class Patch:
             (self.coordinates[1], self.coordinates[0]), self.level, self.size
         )
 
-    def save(self, out_dir, output_format="_patch@({},{})_{}x{}.png"):
+    def save(self, out_dir, output_format="_patch@({},{})_{}x{}.png", save=True):
         """
         Save patch.
         :param out_dir:
@@ -27,13 +27,19 @@ class Patch:
 
         for check_function in self.manager.valid_patch_checks:
             if not check_function(patch):
-                return False
+                return [False, self]
+        
+        try:
+            if save:
+                path = Path(self.slide_path)
+                self.read_patch().save(
+                    fp=out_dir
+                       + path.name.split(path.suffix)[0]
+                       + output_format.format(self.coordinates[0], self.coordinates[1], self.size[0], self.size[1]),
+                    format="PNG",
+                )
 
-        path = Path(self.slide_path)
-        self.read_patch().save(
-            fp=out_dir
-               + path.name.split(path.suffix)[0]
-               + output_format.format(self.coordinates[0], self.coordinates[1], self.size[0], self.size[1]),
-            format="PNG",
-        )
-        return True
+            return [True, self]
+
+        except:
+            return [False, self]
