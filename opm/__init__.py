@@ -1,2 +1,2 @@
-from opm.patch import Patch
-from opm.patch_manager import PatchManager
+from .patch import Patch
+from .patch_manager import PatchManager
