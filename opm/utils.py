@@ -4,7 +4,6 @@ from skimage.filters import gaussian
 from skimage.morphology.selem import disk
 from skimage.morphology import remove_small_objects, remove_small_holes
 from skimage.color.colorconv import rgb2hsv
-from .config import *
 import matplotlib.pyplot as plt
 
 # RGB Masking (pen) constants
