@@ -26,21 +26,34 @@ LAB_A_CHANNEL = 1
 LAB_B_CHANNEL = 2
 LAB_L_THRESHOLD = 0.80
 
-
-
 def pass_method(*args):
+    """
+    Method which takes any number of arguments and returns and empty string. Like 'pass' reserved word, but as a func.
+    @param args: Any number of arguments.
+    @return: An empty string.
+    """
     return ""
 
 
 def get_nonzero_percent(image):
-    # Get first channel to simplify
+    """
+    Return what percentage of image is non-zero. Useful for finding percentage of labels for binary classification.
+    @param image: label map patch.
+    @return: fraction of image that is not zero.
+    """
     np_img = np.asarray(image)
     non_zero = np.count_nonzero(np_img)
     return non_zero / (np_img.shape[0] * np_img.shape[1])
 
 
 def map_values(image, dictionary):
-    template = image.copy()
+    """
+    Modify image by swapping dictionary keys to dictionary values.
+    @param image: Numpy ndarray of an image (usually label map patch).
+    @param dictionary: dict(int => int). Keys in image are swapped to corresponding values.
+    @return:
+    """
+    template = image.copy()  # Copy image so all values not in dict are unmodified
     for key, value in dictionary.items():
         template[image == key] = value
 
@@ -68,21 +81,14 @@ def hue_range_mask(image, min_hue, max_hue, sat_min=0.05):
 def tissue_mask(image):
     """
     Quick and dirty hue range mask for OPM. Works well on H&E.
+    TODO: Improve this
     """
     hue_mask = hue_range_mask(image, 0.8, 0.99)
     final_mask = remove_small_holes(hue_mask)
     return final_mask
 
 
-def basic_pen_mask(image):
-    """
-    Mask based on RGB color channel differences. Will return true where the pixels are significantly more green
-    or blue than the other channels.
-    TODO: Convert to OD, threshold based on green and blue densities
-    TODO: Add watershedding of pen
-    :param image: RGB numpy image
-    :return: image mask, True pixels are pen
-    """
+def basic_pen_mask(image, pen_size_threshold, pen_mask_expansion):
     green_mask = np.bitwise_and(
         image[:, :, RGB_GREEN_CHANNEL] > image[:, :, RGB_GREEN_CHANNEL],
         image[:, :, RGB_GREEN_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL] > MIN_COLOR_DIFFERENCE)
@@ -92,9 +98,9 @@ def basic_pen_mask(image):
         image[:, :, RGB_BLUE_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL] > MIN_COLOR_DIFFERENCE)
 
     masked_pen = np.bitwise_or(green_mask, blue_mask)
-    new_mask_image = remove_small_objects(masked_pen, PEN_SIZE_THRESHOLD)
+    new_mask_image = remove_small_objects(masked_pen, pen_size_threshold)
 
-    return maximum(np.where(new_mask_image, 1, 0), disk(PEN_MASK_EXPANSION)).astype(bool)
+    return maximum(np.where(new_mask_image, 1, 0), disk(pen_mask_expansion)).astype(bool)
 
 
 def basic_hsv_mask(image):
@@ -107,8 +113,10 @@ def basic_hsv_mask(image):
     return np.bitwise_or(hsv_image[:, :, HSV_SAT_CHANNEL] <= MIN_SAT,
                          hsv_image[:, :, HSV_VAL_CHANNEL] <= MIN_VAL)
 
+
 def hybrid_mask(image):
     return ~np.bitwise_or(basic_hsv_mask(image), basic_pen_mask(image))
+
 
 def trim_mask(image, mask, background_value=0, mask_func=hybrid_mask):
     """
@@ -132,7 +140,7 @@ def patch_size_check(img, patch_height, patch_width):
         return True
 
 
-def alpha_channel_check(img, alpha_thresh=0):
+def alpha_channel_check(img):
     img = np.asarray(img)
     alpha_channel = img[:, :, 3]
 

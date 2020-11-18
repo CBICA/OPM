@@ -1,19 +1,29 @@
 import time
 import argparse
-from opm.patch_manager import *
-from opm.utils import *
 import numpy as np
+import warnings
+import yaml
+import os
+import openslide
+
 from PIL import Image
+from pathlib import Path
 from functools import partial
+from opm.patch_manager import PatchManager
+from opm.utils import tissue_mask, alpha_channel_check, patch_size_check
 
 Image.MAX_IMAGE_PIXELS = None
-from pathlib import Path
-import warnings
-
 warnings.simplefilter("ignore")
 
+#
+# 1) Custom header support
+# 2) Replace , with :
+# 3) Refactor config to yaml
+# 4) Replace path multilation with os.path.join()
 
-def generate_initial_mask(slide_path):
+
+
+def generate_initial_mask(slide_path, scale):
     """
     Helper method to generate random coordinates within a slide
     :param slide_path: Path to slide (str)
@@ -25,7 +35,7 @@ def generate_initial_mask(slide_path):
     slide_dims = slide.dimensions
 
     # Call thumbnail for effiency, calculate scale relative to whole slide
-    slide_thumbnail = np.asarray(slide.get_thumbnail((slide_dims[0] // SCALE, slide_dims[1] // SCALE)))
+    slide_thumbnail = np.asarray(slide.get_thumbnail((slide_dims[0] // scale, slide_dims[1] // scale)))
     real_scale = (slide_dims[0] / slide_thumbnail.shape[1], slide_dims[1] / slide_thumbnail.shape[0])
 
     return tissue_mask(slide_thumbnail), real_scale
@@ -41,9 +51,13 @@ if __name__ == '__main__':
                         required=True)
     parser.add_argument('-n', '--num_patches',
                         type=int,
-                        default=1000,
                         dest='num_patches',
                         help="Number of patches to mine. Set to -1 to mine until saturation. ",
+                        required=True)
+    parser.add_argument('-c', '--config',
+                        type=str,
+                        dest='config',
+                        help="config.yml for running OPM. ",
                         required=True)
     parser.add_argument('-lm', '--label_map_path',
                         dest='label_map_path',
@@ -82,22 +96,22 @@ if __name__ == '__main__':
 
     # Create new instance of slide manager
     manager = PatchManager(slide_path)
+    cfg = yaml.load(open(args.config), Loader=yaml.FullLoader)
 
     if args.input_csv is None:
         # Generate an initial validity mask
-        mask, scale = generate_initial_mask(args.input_path)
+        mask, scale = generate_initial_mask(args.input_path, cfg['scale'])
         manager.set_valid_mask(mask, scale)
         manager.set_label_map(args.label_map_path)
 
         # Reject patch if any pixels are transparent
         manager.add_patch_criteria(alpha_channel_check)
         # Reject patch if image dimensions are not equal to PATCH_SIZE
-        patch_dims_check = partial(patch_size_check, patch_height=PATCH_SIZE[0], patch_width=PATCH_SIZE[1])
+        patch_dims_check = partial(patch_size_check, patch_height=cfg['patch_size'][0], patch_width=cfg['patch_size'][1])
         manager.add_patch_criteria(patch_dims_check)
         # Save patches releases saves all patches stored in manager, dumps to specified output file
-        manager.mine_patches(out_dir, n_patches=args.num_patches, output_csv=args.output_csv, n_jobs=NUM_WORKERS,
-                             save=do_save_patches)
+        manager.mine_patches(out_dir, output_csv=args.output_csv, config=cfg)
         print("Total time: {}".format(time.time() - start))
     else:
-        manager.save_predefined_patches(out_dir, patch_coord_csv=args.input_csv)
+        manager.save_predefined_patches(out_dir, patch_coord_csv=args.input_csv, config=cfg)
 
