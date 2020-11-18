@@ -1,8 +1,8 @@
 import concurrent.futures
 import os
 from functools import partial
-from opm.patch import Patch
-from opm.utils import get_nonzero_percent
+from .patch import Patch
+from .utils import get_nonzero_percent
 import numpy as np
 import openslide
 from tqdm import tqdm
