@@ -5,6 +5,9 @@
 ```
 git clone https://github.com/grenkoca/OPM.git
 cd OPM/
+conda create -p ./venv python=3.6.5 -y
+conda activate ./venv
+conda install -c sdvillal openslide # this is only required for windows
 pip install .
 ```
 
