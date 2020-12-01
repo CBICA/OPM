@@ -27,12 +27,12 @@ class PatchManager:
         self.label_map_object = None
         self.label_map_folder = None
         self.label_map_patches = list()
-        self.patientID = None
-        self.save_patientID = False
+        self.subjectID = None
+        self.save_subjectID = False
 
-    def set_patientID(self, patientID):
-        self.patientID = patientID
-        self.save_patientID = True
+    def set_subjectID(self, subjectID):
+        self.subjectID = str(subjectID)
+        self.save_subjectID = True
 
     def set_slide_path(self, filename):
         self.path = filename
@@ -225,8 +225,8 @@ class PatchManager:
         else:
             csv_filename = output_csv
         output = open(csv_filename, "a")
-        if self.save_patientID:
-            output.write("PatientID,")
+        if self.save_subjectID:
+            output.write("SubjectID,")
         if self.label_map is not None:
             output.write("Slide Patch path, Label Map Patch path, Patch Composition\n")
         else:
@@ -325,7 +325,8 @@ class PatchManager:
             n_completed += successful
 
             for index in successful_indices:
-
+                if self.save_subjectID:
+                    output.write(self.subjectID + ",")
                 if self.label_map is not None:
                     slide_patch_path = np_slide_futures[index, 1].get_patch_path(output_directory)
                     lm_patch_path = np_lm_futures[index, 1].get_patch_path(output_directory)
