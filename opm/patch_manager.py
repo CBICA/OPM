@@ -228,7 +228,7 @@ class PatchManager:
         if self.save_subjectID:
             output.write("SubjectID,")
         if self.label_map is not None:
-            output.write("Slide Patch path, Label Map Patch path, Patch Composition\n")
+            output.write("SlidePatchPath,LabelMapPatchPath,PatchComposition\n") 
         else:
             output.write("Slide Patch path\n")
 
