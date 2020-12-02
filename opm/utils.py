@@ -25,6 +25,18 @@ LAB_A_CHANNEL = 1
 LAB_B_CHANNEL = 2
 LAB_L_THRESHOLD = 0.80
 
+
+def print_sorted_dict(dictionary):
+    sorted_keys = sorted(list(dictionary.keys()))
+    output_str = "{"
+    for index, key in enumerate(sorted_keys):
+        output_str += str(key) + ": " + str(dictionary[key])
+        if index < len(sorted_keys) - 1:
+            output_str += "; "
+    output_str += "}"
+
+    return output_str
+
 def pass_method(*args):
     """
     Method which takes any number of arguments and returns and empty string. Like 'pass' reserved word, but as a func.
@@ -43,6 +55,19 @@ def get_nonzero_percent(image):
     np_img = np.asarray(image)
     non_zero = np.count_nonzero(np_img)
     return non_zero / (np_img.shape[0] * np_img.shape[1])
+
+
+def get_patch_class_proportions(image):
+    """
+    Return what percentage of image is non-zero. Useful for finding percentage of labels for binary classification.
+    @param image: label map patch.
+    @return: fraction of image that is not zero.
+    """
+    np_img = np.asarray(image)
+    unique, counts = np.unique(image, return_counts=True)
+    denom = (np_img.shape[0] * np_img.shape[1])
+    prop_dict = {val: count/denom for val, count in list(zip(unique, counts))}
+    return print_sorted_dict(prop_dict)
 
 
 def map_values(image, dictionary):

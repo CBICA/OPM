@@ -2,7 +2,7 @@ import concurrent.futures
 import os
 from functools import partial
 from .patch import Patch
-from .utils import get_nonzero_percent
+from .utils import get_patch_class_proportions
 import numpy as np
 import openslide
 from tqdm import tqdm
@@ -27,6 +27,12 @@ class PatchManager:
         self.label_map_object = None
         self.label_map_folder = None
         self.label_map_patches = list()
+        self.subjectID = None
+        self.save_subjectID = False
+
+    def set_subjectID(self, subjectID):
+        self.subjectID = str(subjectID)
+        self.save_subjectID = True
 
     def set_slide_path(self, filename):
         self.path = filename
@@ -84,8 +90,8 @@ class PatchManager:
                         1]))
                 # Set the valid mask values to False so a coordinate that would cause overlap cannot be called later.
                 self.valid_mask[
-                    max(valid_start_x, 0):self.width_bound_check(valid_end_x),
-                    max(valid_start_y, 0):self.height_bound_check(valid_end_y)
+                max(valid_start_x, 0):self.width_bound_check(valid_end_x),
+                max(valid_start_y, 0):self.height_bound_check(valid_end_y)
                 ] = False
             else:
                 # If the user is okay with 100% overlap, just remove the single pixel of the coordinate.
@@ -99,8 +105,8 @@ class PatchManager:
 
             # Update the mined mask
             self.mined_mask[
-                max(mined_start_x, 0):self.width_bound_check(mined_end_x),
-                max(mined_start_y, 0):self.width_bound_check(mined_end_y)
+            max(mined_start_x, 0):self.width_bound_check(mined_end_x),
+            max(mined_start_y, 0):self.width_bound_check(mined_end_y)
             ] = True
 
             # Append this patch to the list of patches to be saved
@@ -219,8 +225,10 @@ class PatchManager:
         else:
             csv_filename = output_csv
         output = open(csv_filename, "a")
+        if self.save_subjectID:
+            output.write("SubjectID,")
         if self.label_map is not None:
-            output.write("Slide Patch path, Label Map Patch path, Label Map Result\n")
+            output.write("Slide Patch path, Label Map Patch path, Patch Composition\n")
         else:
             output.write("Slide Patch path\n")
 
@@ -294,7 +302,7 @@ class PatchManager:
                                                  output_directory=output_directory,
                                                  save=save,
                                                  check_if_valid=False,
-                                                 patch_processor=get_nonzero_percent,
+                                                 patch_processor=get_patch_class_proportions,
                                                  value_map=value_map)
                 for i in successful_indices:
                     slide_patch = np_slide_futures[i, 1]
@@ -317,6 +325,8 @@ class PatchManager:
             n_completed += successful
 
             for index in successful_indices:
+                if self.save_subjectID:
+                    output.write(self.subjectID + ",")
                 if self.label_map is not None:
                     slide_patch_path = np_slide_futures[index, 1].get_patch_path(output_directory)
                     lm_patch_path = np_lm_futures[index, 1].get_patch_path(output_directory)
@@ -381,7 +391,7 @@ class PatchManager:
                                              output_directory=output_directory,
                                              save=True,
                                              check_if_valid=False,
-                                             patch_processor=get_nonzero_percent,
+                                             patch_processor=get_patch_class_proportions,
                                              value_map=value_map)
             with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
                 list(
