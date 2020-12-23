@@ -1,4 +1,10 @@
 # OPM
+
+<p align="center">
+    <a href="https://pypi.org/project/OpenPatchMiner"><img src="https://img.shields.io/pypi/v/OpenPatchMiner"/></a>
+    <a href="https://dev.azure.com/CBICA/OPM/_build?definitionId=15" alt="Windows_3.6"><img src="https://dev.azure.com/CBICA/OPM/_apis/build/status/OPM-CI?branchName=master" /></a>
+</p>
+
 ### Openslide patch manager: parallel reading/writing of patches.
 
 ## Installation: 
