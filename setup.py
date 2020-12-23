@@ -9,7 +9,11 @@ requirements = [
     'matplotlib',
     'numpy',
     'tqdm',
-    'pandas'
+    'pandas',
+    'wheel',
+    'twine',
+    'keyring',
+    'artifacts-keyring'
 ]
 
 setup(
