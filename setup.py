@@ -18,7 +18,7 @@ requirements = [
 
 setup(
     name='OpenPatchMiner',
-    version='0.1.0',
+    version='0.1.1-dev',
     packages=['opm'],
     python_requires='>=3.6',
     packages=find_packages(),
