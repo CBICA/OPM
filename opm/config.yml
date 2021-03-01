@@ -1,10 +1,11 @@
 # LM Value mapping
-value_map : {1: 40, 2: 80, 3: 120, 4: 200}
+value_map     : {1: 40, 2: 80, 3: 120, 4: 200}
 
-save_patches : True
+# Saving variables: set to False for dummy run
+save_patches  : True
 
 # Overlap option
-read_type      : 'sequential'  # Change to 'sequential' for increased effiency, 'random' for random calls
+read_type      : 'random'  # Change to 'sequential' for increased effiency, 'random' for random calls
 overlap_factor : 0.0  # Portion of patches that are allowed to overlap (0->1)
 
 # Misc
