@@ -1,8 +1,23 @@
 # OPM
+
+<p align="center">
+    <a href="https://pypi.org/project/OpenPatchMiner"><img src="https://img.shields.io/pypi/v/OpenPatchMiner"/></a>
+    <a href="https://dev.azure.com/CBICA/OPM/_build?definitionId=15" alt="Windows_3.6"><img src="https://dev.azure.com/CBICA/OPM/_apis/build/status/OPM-CI?branchName=master" /></a>
+</p>
+
 ### Openslide patch manager: parallel reading/writing of patches.
 
 ## Installation: 
+
+### For Usage Only
+```powershell
+conda create -p ./venv python=3.6.5 -y
+conda activate ./venv
+pip install OpenPatchMiner
 ```
+
+### For OPM Development
+```powershell
 git clone https://github.com/grenkoca/OPM.git
 cd OPM/
 conda create -p ./venv python=3.6.5 -y
@@ -13,7 +28,8 @@ pip install .
 
 ## Usage
 To try an example:
-```
+```powershell
+# continue from virtual environment shell
 python patch_miner.py -i images/example_slide.tiff -lm images/example_lm.tiff -o example -n -1
 ```
 By default it detects tissue and extracts 1000 random patches from the included .svs file. Play with this number as well as the number of parallel threads in example.py (default patches=1000, default threads=100)
