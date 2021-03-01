@@ -102,7 +102,8 @@ if __name__ == '__main__':
         # Generate an initial validity mask
         mask, scale = generate_initial_mask(args.input_path, cfg['scale'])
         manager.set_valid_mask(mask, scale)
-        manager.set_label_map(args.label_map_path)
+        if args.label_map_path is not None:
+            manager.set_label_map(args.label_map_path)
 
         # Reject patch if any pixels are transparent
         manager.add_patch_criteria(alpha_channel_check)
