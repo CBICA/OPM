@@ -333,7 +333,7 @@ class PatchManager:
                     lm_result = np_lm_futures[index, 2]
                     output.write("{},{},{}\n".format(slide_patch_path, lm_patch_path, lm_result))
                 else:
-                    path_path = np_slide_futures[index, 1][index].get_patch_path(output_directory)
+                    path_path = np_slide_futures[index, 1].get_patch_path(output_directory)
                     output.write("{}\n".format(path_path))
 
         output.close()

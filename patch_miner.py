@@ -49,11 +49,6 @@ if __name__ == '__main__':
                         dest='input_path',
                         help="input path for the tissue",
                         required=True)
-    parser.add_argument('-n', '--num_patches',
-                        type=int,
-                        dest='num_patches',
-                        help="Number of patches to mine. Set to -1 to mine until saturation. ",
-                        required=True)
     parser.add_argument('-c', '--config',
                         type=str,
                         dest='config',
@@ -71,9 +66,6 @@ if __name__ == '__main__':
     parser.add_argument('-icsv', '--input_csv',
                         dest='input_csv', default=None,
                         help="CSV with x,y coordinates of patches to mine.")
-    parser.add_argument('-t', '--threads',
-                        dest='threads',
-                        help="number of threads, by default will use all")
 
     args = parser.parse_args()
     if args.output_path is None:
@@ -102,7 +94,8 @@ if __name__ == '__main__':
         # Generate an initial validity mask
         mask, scale = generate_initial_mask(args.input_path, cfg['scale'])
         manager.set_valid_mask(mask, scale)
-        manager.set_label_map(args.label_map_path)
+        if args.label_map_path is not None:
+            manager.set_label_map(args.label_map_path)
 
         # Reject patch if any pixels are transparent
         manager.add_patch_criteria(alpha_channel_check)
