@@ -37,6 +37,7 @@ def print_sorted_dict(dictionary):
 
     return output_str
 
+
 def pass_method(*args):
     """
     Method which takes any number of arguments and returns and empty string. Like 'pass' reserved word, but as a func.
@@ -65,8 +66,8 @@ def get_patch_class_proportions(image):
     """
     np_img = np.asarray(image)
     unique, counts = np.unique(image, return_counts=True)
-    denom = (np_img.shape[0] * np_img.shape[1])
-    prop_dict = {val: count/denom for val, count in list(zip(unique, counts))}
+    denom = np_img.shape[0] * np_img.shape[1]
+    prop_dict = {val: count / denom for val, count in list(zip(unique, counts))}
     return print_sorted_dict(prop_dict)
 
 
@@ -115,16 +116,22 @@ def tissue_mask(image):
 def basic_pen_mask(image, pen_size_threshold, pen_mask_expansion):
     green_mask = np.bitwise_and(
         image[:, :, RGB_GREEN_CHANNEL] > image[:, :, RGB_GREEN_CHANNEL],
-        image[:, :, RGB_GREEN_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL] > MIN_COLOR_DIFFERENCE)
+        image[:, :, RGB_GREEN_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL]
+        > MIN_COLOR_DIFFERENCE,
+    )
 
     blue_mask = np.bitwise_and(
         image[:, :, RGB_BLUE_CHANNEL] > image[:, :, RGB_GREEN_CHANNEL],
-        image[:, :, RGB_BLUE_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL] > MIN_COLOR_DIFFERENCE)
+        image[:, :, RGB_BLUE_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL]
+        > MIN_COLOR_DIFFERENCE,
+    )
 
     masked_pen = np.bitwise_or(green_mask, blue_mask)
     new_mask_image = remove_small_objects(masked_pen, pen_size_threshold)
 
-    return maximum(np.where(new_mask_image, 1, 0), disk(pen_mask_expansion)).astype(bool)
+    return maximum(np.where(new_mask_image, 1, 0), disk(pen_mask_expansion)).astype(
+        bool
+    )
 
 
 def basic_hsv_mask(image):
@@ -134,8 +141,10 @@ def basic_hsv_mask(image):
     :return: image mask, True pixels are gray-black.
     """
     hsv_image = rgb2hsv(image)
-    return np.bitwise_or(hsv_image[:, :, HSV_SAT_CHANNEL] <= MIN_SAT,
-                         hsv_image[:, :, HSV_VAL_CHANNEL] <= MIN_VAL)
+    return np.bitwise_or(
+        hsv_image[:, :, HSV_SAT_CHANNEL] <= MIN_SAT,
+        hsv_image[:, :, HSV_VAL_CHANNEL] <= MIN_VAL,
+    )
 
 
 def hybrid_mask(image):
