@@ -12,8 +12,7 @@ requirements = [
     'pandas',
     'wheel',
     'twine',
-    'keyring',
-    'artifacts-keyring'
+    'keyring'
 ]
 
 setup(
