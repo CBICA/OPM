@@ -56,5 +56,5 @@ steps:
     pythonUploadServiceConnection: PyPi  
 
 - script: |
-    python -m twine upload --skip-existing -r "openpatchminer" --config-file $(PYPIRC_PATH) dist/*.whl
+    python -m twine upload --skip-existing -r "openpatchminer" --config-file $(PYPIRC_PATH) dist/*.
   displayName: 'Uploading build'
