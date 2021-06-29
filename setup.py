@@ -12,13 +12,12 @@ requirements = [
     'pandas',
     'wheel',
     'twine',
-    'keyring',
-    'artifacts-keyring'
+    'keyring'
 ]
 
 setup(
     name='OpenPatchMiner',
-    version='0.1.2',
+    version='0.1.4',
     python_requires='>=3.6',
     packages=find_packages(),
     install_requires=requirements,
