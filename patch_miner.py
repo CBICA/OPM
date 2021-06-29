@@ -65,7 +65,7 @@ LEVEL_NAME           = logging.getLevelName('DEBUG')
 DESCRITPTION_MESSAGE = \
                         'This program is based on Open Slide Patch Manger (OPM) and   ' + '\n'\
                         'slices an image into patches.                                ' + '\n'\
-                        'The generated patches properties are defined in a yamel file.' + '\n'\
+                        'The generated patches properties are defined in a yaml file.' + '\n'\
                         'In addition, tow csv files are generated, the first listings ' + '\n'\
                         'patch files names and XY coordinates. The second parses only ' + '\n'\
                         'xy coordinates. The later csv file is meant to be used as an ' + '\n'\
@@ -89,13 +89,13 @@ def GetConsoleHandler(TargetOutput):
     return ConsoleHandler
 #-----------------------------------------------------------------
 def GetLogger(LoggerName,TargetOutput):
-   logger     = logging.getLogger(LoggerName)
-   logger.setLevel(LEVEL_NAME) # better to have too much log than not enough
-   LogHandler = GetConsoleHandler(TargetOutput)
-   logger.addHandler(LogHandler)
-   # with this pattern, it's rarely necessary to propagate the error up to parent
-   logger.propagate = False
-   return logger,LogHandler
+    logger     = logging.getLogger(LoggerName)
+    logger.setLevel(LEVEL_NAME) # better to have too much log than not enough
+    LogHandler = GetConsoleHandler(TargetOutput)
+    logger.addHandler(LogHandler)
+    # with this pattern, it's rarely necessary to propagate the error up to parent
+    logger.propagate = False
+    return logger,LogHandler
 #-----------------------------------------------------------------
 class LogDecorator(object):
     def __init__(self):
@@ -282,7 +282,7 @@ def ParseCsvPatchesFiles(FilePath,FileName):
     DataframeColumnNames         = [FilePathColumnName,X_CoordinateColumnName,Y_CoordinateColumnName]
     
     StdOutLogger.info('****************************************')
-          
+
     StdOutLogger.info('Reading CSV File: {}'.format(Path(FilePath).stem))
     XYCoordinatesDataframe         = pd.read_csv(FilePath)
     
@@ -308,7 +308,7 @@ def ParseCsvPatchesFiles(FilePath,FileName):
         CleanedXYCoordinatesDataframe.to_csv(str(CsvFilePath), index=False)
     except:
         raise IOError('Can not save CSV file: {}'.format(OutputFileName))
-             
+
     return OutputXYCoordinatesFileList   
 
 #------------------------------------------------------------------------------------------------
