@@ -47,7 +47,7 @@ steps:
 #   displayName: 'Run through a small test'
 
 - script: |
-    python setup.py bdist_wheel
+    python setup.py bdist_wheel sdist 
   displayName: 'Artifact creation'
 
 - task: TwineAuthenticate@1
