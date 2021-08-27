@@ -172,3 +172,12 @@ def alpha_channel_check(img):
         return False
     else:
         return True
+
+
+def tissue_occupancy_check(patch_image, lum_threshold=90, occupancy_threshold=0.7):
+    patch_image = np.array(patch_image)[..., :3]# Convert the image to RGB if it is RGBA
+    lum = rgb2lab(patch_image)[..., 0] # Take the picture lightness channel from the convert LAB image
+
+    # Create a mask where Tissue is set to True and Background is set to False based on luminous threshold
+    mask = lum < lum_threshold
+    return np.count_nonzero(mask) / np.product(mask.shape) > occupancy_thresh

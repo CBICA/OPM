@@ -39,7 +39,7 @@ from PIL               import Image
 from functools         import partial
 from datetime          import datetime
 from opm.patch_manager import PatchManager
-from opm.utils         import tissue_mask, alpha_channel_check, patch_size_check
+from opm.utils         import tissue_mask, alpha_channel_check, patch_size_check, tissue_occupancy_check
 #
 Image.MAX_IMAGE_PIXELS = None
 warnings.simplefilter("ignore")
@@ -363,7 +363,16 @@ def ProcessPatches(PatchesOutputDirectory,ConfigurationFile):
             manager.add_patch_criteria(patch_dims_check)
         except:
             raise IOError('Exception add_patch_criteria failed')         
-            
+        #-----------------------------------------------------------------
+        try:
+            StdOutLogger.info('Apply Patch Tissue percentage check')
+            tissue_percent_check = partial(tissue_occupancy_check,
+                                           lum_threshold=90,
+                                           occupancy_threshold=ConfigurationFile['tissue_occupancy_threshold'])
+            manager.add_patch_criteria(patch_tissue_percent_check)
+        except:
+            raise IOError('Exception tissue_occupancy_check failed')
+
         #-----------------------------------------------------------------        
         FileName         = str(Path(InputArguments.Input_Image_Path).stem) + 'XYPatchCoordinates.csv'           
         StdOutLogger.info('File Name: {}'.format(FileName))
