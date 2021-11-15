@@ -378,7 +378,7 @@ class PatchManager:
         output.close()
 
         # delete temp directory
-        shutil.rmtree(str(self.temp_dir), ignore_errors=True)
+        shutil.rmtree(str(self.temp_dir))
 
         print("Done!")
 
