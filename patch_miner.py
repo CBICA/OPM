@@ -78,8 +78,6 @@ if __name__ == '__main__':
 
         do_save_patches = True
         out_dir = os.path.abspath(args.output_path)
-        if not out_dir.endswith("/"):
-            out_dir += "/"
     # Path to openslide supported file (.svs, .tiff, etc.)
     slide_path = os.path.abspath(args.input_path)
 
