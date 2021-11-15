@@ -22,7 +22,7 @@ class PatchManager:
         self.temp_dir.mkdir(parents=True, exist_ok=True)
         self.path = self.convert_to_tiff(filename, "img")
         self.slide_object = openslide.open_slide(self.path)
-        self.slide_dims = openslide.open_slide(self.path).dimensions
+        self.slide_dims = self.slide_object.dimensions
         self.slide_folder = filename[:filename.rindex(".")].split("/")[-1] + "/"
         self.valid_mask = None
         self.mined_mask = None
@@ -253,7 +253,7 @@ class PatchManager:
 
         if output_csv is None:
             print("Creating output csv")
-            csv_filename = output_directory + self.path[:self.path.rindex(".")].split("/")[-1] + ".csv"
+            csv_filename = os.path.join(output_directory, "list.csv")
         else:
             csv_filename = output_csv
         output = open(csv_filename, "a")
