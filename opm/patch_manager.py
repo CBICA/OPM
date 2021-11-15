@@ -6,7 +6,10 @@ from .utils import get_patch_class_proportions
 import numpy as np
 import openslide
 from tqdm import tqdm
-
+import tempfile
+from pathlib import Path
+import skimage.io
+import shutil
 
 class PatchManager:
     def __init__(self, filename):
@@ -15,7 +18,9 @@ class PatchManager:
         @param filename: name of main WSI.
         """
         self.patches = list()
-        self.path = filename
+        self.temp_dir = Path(tempfile.TemporaryDirectory().name)
+        self.temp_dir.mkdir(parents=True, exist_ok=True)
+        self.path = self.convert_to_tiff(filename, "img")
         self.slide_object = openslide.open_slide(filename)
         self.slide_dims = openslide.open_slide(self.path).dimensions
         self.slide_folder = filename[:filename.rindex(".")].split("/")[-1] + "/"
@@ -30,6 +35,18 @@ class PatchManager:
         self.subjectID = None
         self.save_subjectID = False
 
+    def convert_to_tiff(self, filename, img_type):
+        _, ext = os.path.splitext(filename)
+        # for png or jpg images, write image back to tiff
+        if ext in [".png", ".jpg", ".jpeg"]:
+            temp_file = os.path.join(str(self.temp_dir), "temp_" + img_type + ".tiff")
+            temp_img = skimage.io.imread(filename) 
+            skimage.io.imsave(temp_file, temp_img)
+            return temp_file
+        else:
+            return filename
+
+
     def set_subjectID(self, subjectID):
         self.subjectID = str(subjectID)
         self.save_subjectID = True
@@ -42,7 +59,7 @@ class PatchManager:
         Add associated label map to Patch Manager.
         @param path: path to label map.
         """
-        self.label_map = path
+        self.label_map = self.convert_to_tiff(path, "mask")
         self.label_map_object = openslide.open_slide(path)
         assert all(x == y for x, y in zip(self.label_map_object.dimensions, self.slide_object.dimensions)), \
             "Label map must have same dimensions as main slide."
@@ -214,10 +231,25 @@ class PatchManager:
         @param value_map: Dictionary for value swapping.
         """
 
+        # initialize defaults
+        if not('num_patches' in config):
+            config['num_patches'] = -1
         n_patches = config['num_patches']
+        if not('num_workers' in config):
+            config['num_workers'] = 1
         n_jobs = config['num_workers']
+        if not('save_patches' in config):
+            config['save_patches'] = True
         save = config['save_patches']
+        if not('value_map' in config):
+            config['value_map'] = None
+        if not('read_type' in config):
+            config['read_type'] = "random"
+        if not('overlap_factor' in config):
+            config['overlap_factor'] = 0.0
         value_map = config['value_map']
+        
+        Path(output_directory).mkdir(parents=True, exist_ok=True)
 
         if output_csv is None:
             print("Creating output csv")
@@ -276,7 +308,10 @@ class PatchManager:
                           "Alternatively, change READ_TYPE to 'sequential' for greater mining effiency.")
                     saturated = True
 
-            os.makedirs(output_directory + self.slide_folder, exist_ok=True)
+            # Save patches
+            output_dir_slide_folder = os.path.join(output_directory, self.slide_folder)
+            Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
+            
             print("Saving patches:")
             with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
                 np_slide_futures = list(
@@ -310,7 +345,9 @@ class PatchManager:
                     self.label_map_patches.append(lm_patch)
 
                 print("Saving label maps:")
-                os.makedirs(output_directory + self.label_map_folder, exist_ok=True)
+                output_dir_mask_folder = os.path.join(output_directory, self.label_map_folder)
+                Path(output_dir_mask_folder).mkdir(parents=True, exist_ok=True)
+                
                 with concurrent.futures.ThreadPoolExecutor(config['num_workers']) as executor:
                     lm_futures = list(
                         tqdm(
@@ -338,6 +375,9 @@ class PatchManager:
 
         output.close()
 
+        # delete temp directory
+        shutil.rmtree(str(self.temp_dir))
+
         print("Done!")
 
     def save_predefined_patches(self, output_directory, patch_coord_csv, config):
@@ -354,12 +394,15 @@ class PatchManager:
         patch_size = config['patch_size']
         n_jobs = config['num_workers']
 
+        Path(output_directory).mkdir(parents=True, exist_ok=True)
+        output_dir_slide_folder = os.path.join(output_directory, self.slide_folder)
+        Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
         # Todo, port to pandas or something more sophisticated?
         with open(patch_coord_csv, "r") as input_csv:
             for line in input_csv:
                 try:
                     x, y = [int(val) for val in line.split(",")]
-                    os.makedirs(output_directory + self.slide_folder, exist_ok=True)
+                    
                     _save_patch_partial = partial(_save_patch, output_directory=output_directory,
                                                   save=True,
                                                   check_if_valid=False)
@@ -373,7 +416,6 @@ class PatchManager:
                 except Exception as e:
                     print(e)
 
-        os.makedirs(output_directory + self.slide_folder, exist_ok=True)
         print("Saving slide patches:")
         with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
             list(
