@@ -1,5 +1,5 @@
 from pathlib import Path
-from opm.utils import pass_method, map_values
+from .utils import pass_method, map_values
 import numpy as np
 from skimage.io import imsave
 from openslide import OpenSlide
