@@ -21,7 +21,7 @@ class PatchManager:
         self.temp_dir = Path(tempfile.TemporaryDirectory().name)
         self.temp_dir.mkdir(parents=True, exist_ok=True)
         self.path = self.convert_to_tiff(filename, "img")
-        self.slide_object = openslide.open_slide(filename)
+        self.slide_object = openslide.open_slide(self.path)
         self.slide_dims = openslide.open_slide(self.path).dimensions
         self.slide_folder = filename[:filename.rindex(".")].split("/")[-1] + "/"
         self.valid_mask = None
@@ -60,7 +60,7 @@ class PatchManager:
         @param path: path to label map.
         """
         self.label_map = self.convert_to_tiff(path, "mask")
-        self.label_map_object = openslide.open_slide(path)
+        self.label_map_object = openslide.open_slide(self.label_map)
         assert all(x == y for x, y in zip(self.label_map_object.dimensions, self.slide_object.dimensions)), \
             "Label map must have same dimensions as main slide."
         self.label_map_folder = path[:path.rindex(".")].split("/")[-1] + "/"
@@ -147,7 +147,7 @@ class PatchManager:
             x_value = np.random.choice(self.slide_dims[0], 1)
             y_value = np.random.choice(self.slide_dims[1], 1)
             coordinates = np.array([x_value, y_value])
-            patch = Patch(self.path, self.slide_object, self, coordinates, 0, patch_size, "_patch@{}-{}.png")
+            patch = Patch(self.path, self.slide_object, self, coordinates, 0, patch_size, "_patch_{}-{}.png")
 
             return self.add_patch(patch, overlap_factor, patch_size)
 
@@ -178,7 +178,7 @@ class PatchManager:
                               coordinates=coordinates,
                               level=0,
                               size=patch_size,
-                              output_suffix="_patch@{}-{}.png")
+                              output_suffix="_patch_{}-{}.png")
                 return self.add_patch(patch, overlap_factor, patch_size)
             except Exception as e:
                 print("Exception thrown when adding next patch:")
@@ -407,7 +407,7 @@ class PatchManager:
                                                   save=True,
                                                   check_if_valid=False)
 
-                    patch = Patch(self.path, self.slide_object, self, [x, y], 0, patch_size, "_patch@{}-{}.png")
+                    patch = Patch(self.path, self.slide_object, self, [x, y], 0, patch_size, "_patch_{}-{}.png")
                     self.patches.append(patch)
 
                     if self.label_map is not None:
@@ -453,7 +453,7 @@ class PatchManager:
         lm_patch = slide_patch.copy()
         lm_patch.set_slide(self.label_map)
         lm_patch.slide_object = self.label_map_object
-        lm_patch.output_suffix = "_patch@{}-{}_LM.png"
+        lm_patch.output_suffix = "_patch_{}-{}_LM.png"
 
         return lm_patch
 
