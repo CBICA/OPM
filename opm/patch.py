@@ -23,7 +23,7 @@ class Patch:
         self.manager = manager
         self._slide_path = slide_path
         self.slide_object = slide_object
-        self.subfolder = slide_path[:slide_path.rindex(".")].split("/")[-1] + "/"
+        self.subfolder = Path(slide_path).stem
         self.coordinates = coordinates
         self.level = level
         self.size = size
@@ -57,7 +57,7 @@ class Patch:
         # Change slide path
         self._slide_path = slide_path
         # Re-assign subfolder within output folder
-        self.subfolder = Path(slide_path).stem + "/"
+        self.subfolder = Path(slide_path).stem
 
     def get_patch_path(self, out_dir):
         """
@@ -74,7 +74,7 @@ class Patch:
         @param out_dir: Output directory for saving the patch. Supplied by patch_manager.py
         @param save: If False it will not write to disk. Helpful for debugging.
         @param check_if_valid: Run through checks supplied by manager. If rejected, don't save.
-        @param process_method: A method that takes an image as an imput and returns a string. Summarizes patch info.
+        @param process_method: A method that takes an image as an input and returns a string. Summarizes patch info.
             If left as None, it will use utils.pass_method() and return an empty string.
         @param value_map: Map key values in patch to alternate value. dict(key => value) where key, value are ints.
             alters the patch by substituting key for value in the image, leaves values not in dictionary unaltered.
