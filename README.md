@@ -2,6 +2,7 @@
 
 <p align="center">
     <a href="https://pypi.org/project/OpenPatchMiner"><img src="https://img.shields.io/pypi/v/OpenPatchMiner"/></a>
+    <a href="https://anaconda.org/conda-forge/openpatchminer"><img src="https://img.shields.io/conda/vn/conda-forge/openpatchminer.svg"/></a>
     <a href="https://dev.azure.com/CBICA/OPM/_build?definitionId=15" alt="Windows_3.6"><img src="https://dev.azure.com/CBICA/OPM/_apis/build/status/OPM-CI?branchName=master" /></a>
 </p>
 
@@ -14,6 +15,8 @@
 conda create -p ./venv python=3.6.5 -y
 conda activate ./venv
 pip install OpenPatchMiner
+## alternate
+# conda install -c conda-forge openpatchminer
 ```
 
 ### For OPM Development
