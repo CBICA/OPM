@@ -20,10 +20,8 @@ class PatchManager:
         self.patches = list()
         self.temp_dir = Path(tempfile.TemporaryDirectory().name)
         self.temp_dir.mkdir(parents=True, exist_ok=True)
-        self.path = self.convert_to_tiff(filename, "img")
-        self.slide_object = openslide.open_slide(self.path)
-        self.slide_dims = self.slide_object.dimensions
-        self.slide_folder = filename[:filename.rindex(".")].split("/")[-1] + "/"
+        self.img_path = filename
+        self.slide_folder = Path(filename).stem
         self.valid_mask = None
         self.mined_mask = None
         self.valid_mask_scale = (0, 0)
@@ -52,7 +50,7 @@ class PatchManager:
         self.save_subjectID = True
 
     def set_slide_path(self, filename):
-        self.path = filename
+        self.img_path = filename
 
     def set_label_map(self, path):
         """
@@ -61,9 +59,13 @@ class PatchManager:
         """
         self.label_map = self.convert_to_tiff(path, "mask")
         self.label_map_object = openslide.open_slide(self.label_map)
-        assert all(x == y for x, y in zip(self.label_map_object.dimensions, self.slide_object.dimensions)), \
+        self.img_path = self.convert_to_tiff(self.img_path, "img")
+        self.slide_object = openslide.open_slide(self.img_path)
+        self.slide_dims = self.slide_object.dimensions
+        
+        assert all(x == y for x, y in zip(self.label_map_object.dimensions, self.slide_dims)), \
             "Label map must have same dimensions as main slide."
-        self.label_map_folder = path[:path.rindex(".")].split("/")[-1] + "/"
+        self.label_map_folder = Path(path).stem
 
     def set_valid_mask(self, mask, scale=(1, 1)):
         self.valid_mask = mask
@@ -147,7 +149,7 @@ class PatchManager:
             x_value = np.random.choice(self.slide_dims[0], 1)
             y_value = np.random.choice(self.slide_dims[1], 1)
             coordinates = np.array([x_value, y_value])
-            patch = Patch(self.path, self.slide_object, self, coordinates, 0, patch_size, "_patch_{}-{}.png")
+            patch = Patch(self.img_path, self.slide_object, self, coordinates, 0, patch_size, "_patch_{}-{}.png")
 
             return self.add_patch(patch, overlap_factor, patch_size)
 
@@ -172,7 +174,7 @@ class PatchManager:
 
                 coordinates = np.array([x_values[choice], y_values[choice]]).ravel()
 
-                patch = Patch(slide_path=self.path,
+                patch = Patch(slide_path=self.img_path,
                               slide_object=self.slide_object,
                               manager=self,
                               coordinates=coordinates,
@@ -267,10 +269,6 @@ class PatchManager:
         if n_patches == -1:
             n_patches = np.Inf
 
-        _save_patch_partial = partial(_save_patch,
-                                      output_directory=output_directory,
-                                      save=save,
-                                      check_if_valid=True)
         n_completed = 0
         saturated = False
 
@@ -311,6 +309,10 @@ class PatchManager:
             # Save patches
             output_dir_slide_folder = os.path.join(output_directory, self.slide_folder)
             Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
+            _save_patch_partial = partial(_save_patch,
+                                        output_directory=output_dir_slide_folder,
+                                        save=save,
+                                        check_if_valid=True)
             
             print("Saving patches:")
             with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
@@ -333,12 +335,6 @@ class PatchManager:
 
             # Find all successfully saved patches, copy and extract from label map.
             if self.label_map is not None:
-                _lm_save_patch_partial = partial(_save_patch,
-                                                 output_directory=output_directory,
-                                                 save=save,
-                                                 check_if_valid=False,
-                                                 patch_processor=get_patch_class_proportions,
-                                                 value_map=value_map)
                 for i in successful_indices:
                     slide_patch = np_slide_futures[i, 1]
                     lm_patch = self.pull_from_label_map(slide_patch)
@@ -348,6 +344,12 @@ class PatchManager:
                 output_dir_mask_folder = os.path.join(output_directory, self.label_map_folder)
                 Path(output_dir_mask_folder).mkdir(parents=True, exist_ok=True)
                 
+                _lm_save_patch_partial = partial(_save_patch,
+                                                 output_directory=output_dir_mask_folder,
+                                                 save=save,
+                                                 check_if_valid=False,
+                                                 patch_processor=get_patch_class_proportions,
+                                                 value_map=value_map)
                 with concurrent.futures.ThreadPoolExecutor(config['num_workers']) as executor:
                     lm_futures = list(
                         tqdm(
@@ -365,18 +367,18 @@ class PatchManager:
                 if self.save_subjectID:
                     output.write(self.subjectID + ",")
                 if self.label_map is not None:
-                    slide_patch_path = np_slide_futures[index, 1].get_patch_path(output_directory)
-                    lm_patch_path = np_lm_futures[index, 1].get_patch_path(output_directory)
+                    slide_patch_path = np_slide_futures[index, 1].get_patch_path(output_directory, False)
+                    lm_patch_path = np_lm_futures[index, 1].get_patch_path(output_directory, False)
                     lm_result = np_lm_futures[index, 2]
                     output.write("{},{},{}\n".format(slide_patch_path, lm_patch_path, lm_result))
                 else:
-                    path_path = np_slide_futures[index, 1].get_patch_path(output_directory)
+                    path_path = np_slide_futures[index, 1].get_patch_path(output_directory, False)
                     output.write("{}\n".format(path_path))
 
         output.close()
 
         # delete temp directory
-        shutil.rmtree(str(self.temp_dir))
+        shutil.rmtree(str(self.temp_dir), ignore_errors=True)
 
         print("Done!")
 
@@ -407,7 +409,7 @@ class PatchManager:
                                                   save=True,
                                                   check_if_valid=False)
 
-                    patch = Patch(self.path, self.slide_object, self, [x, y], 0, patch_size, "_patch_{}-{}.png")
+                    patch = Patch(self.img_path, self.slide_object, self, [x, y], 0, patch_size, "_patch_{}-{}.png")
                     self.patches.append(patch)
 
                     if self.label_map is not None:
@@ -428,7 +430,6 @@ class PatchManager:
 
         print("Saving label maps:")
         if self.label_map is not None:
-            os.makedirs(output_directory + self.label_map_folder, exist_ok=True)
             _lm_save_patch_partial = partial(_save_patch,
                                              output_directory=output_directory,
                                              save=True,

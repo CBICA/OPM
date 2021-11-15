@@ -59,14 +59,15 @@ class Patch:
         # Re-assign subfolder within output folder
         self.subfolder = Path(slide_path).stem
 
-    def get_patch_path(self, out_dir):
+    def get_patch_path(self, out_dir, create_dir=True):
         """
         Returns string of the path to where this patch will be saved.
         @param out_dir: The output directory
         @return: str
         """
         path = Path(self._slide_path)
-        Path(out_dir, self.subfolder).mkdir(parents=True, exist_ok=True)
+        if create_dir:
+            Path(out_dir, self.subfolder).mkdir(parents=True, exist_ok=True)
         return os.path.join(out_dir, self.subfolder, path.name.split(path.suffix)[0] + self.output_suffix.format(self.coordinates[0], self.coordinates[1]))
 
     def save(self, out_dir, save=True, check_if_valid=True, process_method=None, value_map=None):
