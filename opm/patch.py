@@ -66,6 +66,7 @@ class Patch:
         @return: str
         """
         path = Path(self._slide_path)
+        Path(out_dir, self.subfolder).mkdir(parents=True, exist_ok=True)
         return os.path.join(out_dir, self.subfolder, path.name.split(path.suffix)[0] + self.output_suffix.format(self.coordinates[0], self.coordinates[1]))
 
     def save(self, out_dir, save=True, check_if_valid=True, process_method=None, value_map=None):
