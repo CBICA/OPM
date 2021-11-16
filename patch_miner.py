@@ -87,6 +87,8 @@ if __name__ == '__main__':
     # Create new instance of slide manager
     manager = PatchManager(slide_path, args.output_path)
     cfg = yaml.load(open(args.config), Loader=yaml.FullLoader)
+    if not('scale' in cfg):
+        cfg['scale'] = 16
 
     if args.input_csv is None:
         # Generate an initial validity mask
