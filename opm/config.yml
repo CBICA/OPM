@@ -9,7 +9,7 @@ read_type      : 'random'  # Change to 'sequential' for increased efficiency; de
 overlap_factor : 0.0  # Portion of patches that are allowed to overlap (0->1); defaults to "0.0"
 
 # Misc
-white_color : 250
+# white_color : 250 ## unused in the code right now
 scale       : 16 # scale at which operations such as tissue mask calculation happens; defaults to 16
 patch_size  : !!python/tuple [256, 256]
 num_workers : 1 # number of threads to use during computation; defaults to 1
