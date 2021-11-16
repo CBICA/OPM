@@ -379,7 +379,7 @@ class PatchManager:
 
         print("Done!")
 
-    def save_predefined_patches(self, output_directory, patch_coord_csv, config):
+    def save_predefined_patches(self, patch_coord_csv, config):
         """
 
         @param output_directory:
