@@ -15,13 +15,6 @@ from opm.utils import tissue_mask, alpha_channel_check, patch_size_check, parse_
 Image.MAX_IMAGE_PIXELS = None
 warnings.simplefilter("ignore")
 
-#
-# 1) Custom header support
-# 2) Replace , with :
-# 3) Refactor config to yaml
-# 4) Replace path multilation with os.path.join()
-
-
 
 def generate_initial_mask(slide_path, scale):
     """
