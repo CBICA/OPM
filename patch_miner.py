@@ -10,7 +10,7 @@ from PIL import Image
 from pathlib import Path
 from functools import partial
 from opm.patch_manager import PatchManager
-from opm.utils import tissue_mask, alpha_channel_check, patch_size_check
+from opm.utils import tissue_mask, alpha_channel_check, patch_size_check, parse_config
 
 Image.MAX_IMAGE_PIXELS = None
 warnings.simplefilter("ignore")
@@ -86,9 +86,7 @@ if __name__ == '__main__':
 
     # Create new instance of slide manager
     manager = PatchManager(slide_path, args.output_path)
-    cfg = yaml.load(open(args.config), Loader=yaml.FullLoader)
-    if not('scale' in cfg):
-        cfg['scale'] = 16
+    cfg = parse_config(args.config)
 
     if args.input_csv is None:
         # Generate an initial validity mask
