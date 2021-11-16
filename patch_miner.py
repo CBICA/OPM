@@ -85,7 +85,7 @@ if __name__ == '__main__':
         raise ValueError("Could not find the slide, could you recheck the path?")
 
     # Create new instance of slide manager
-    manager = PatchManager(slide_path)
+    manager = PatchManager(slide_path, args.output_path)
     cfg = yaml.load(open(args.config), Loader=yaml.FullLoader)
 
     if args.input_csv is None:
@@ -101,8 +101,8 @@ if __name__ == '__main__':
         patch_dims_check = partial(patch_size_check, patch_height=cfg['patch_size'][0], patch_width=cfg['patch_size'][1])
         manager.add_patch_criteria(patch_dims_check)
         # Save patches releases saves all patches stored in manager, dumps to specified output file
-        manager.mine_patches(out_dir, output_csv=args.output_csv, config=cfg)
+        manager.mine_patches(output_csv=args.output_csv, config=cfg)
         print("Total time: {}".format(time.time() - start))
     else:
-        manager.save_predefined_patches(out_dir, patch_coord_csv=args.input_csv, config=cfg)
+        manager.save_predefined_patches(patch_coord_csv=args.input_csv, config=cfg)
 
