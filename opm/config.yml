@@ -12,8 +12,8 @@ overlap_factor : 0.0  # Portion of patches that are allowed to overlap (0->1); d
 white_color : 250
 scale       : 16
 patch_size  : !!python/tuple [256, 256]
-num_workers : 1
-num_patches : 10 # -1 to mine until exhaustion, or a + int for number of patches
+num_workers : 1 # number of threads to use during computation; defaults to 1
+num_patches : 10 # -1 to mine until exhaustion, or a + int for number of patches; defaults to -1
 
 # RGB Masking
 pen_size_threshold   : 200
