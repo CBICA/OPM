@@ -12,14 +12,12 @@ import skimage.io
 import shutil
 
 class PatchManager:
-    def __init__(self, filename):
+    def __init__(self, filename, output_dir):
         """
         Initialization for PatchManager
         @param filename: name of main WSI.
         """
         self.patches = list()
-        self.temp_dir = Path(tempfile.TemporaryDirectory().name)
-        self.temp_dir.mkdir(parents=True, exist_ok=True)
         self.img_path = filename
         self.slide_folder = Path(filename).stem
         self.valid_mask = None
@@ -32,12 +30,17 @@ class PatchManager:
         self.label_map_patches = list()
         self.subjectID = None
         self.save_subjectID = False
+        self.output_dir = output_dir
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
+
 
     def convert_to_tiff(self, filename, img_type):
-        _, ext = os.path.splitext(filename)
+        base, ext = os.path.splitext(filename)
         # for png or jpg images, write image back to tiff
         if ext in [".png", ".jpg", ".jpeg"]:
-            temp_file = os.path.join(str(self.temp_dir), "temp_" + img_type + ".tiff")
+            self.converted_img_path = os.path.join(self.output_dir, "tiff_converted")
+            Path(self.converted_img_path).mkdir(parents=True, exist_ok=True)
+            temp_file = os.path.join(self.converted_img_path, os.path.basename(base) + "_" + img_type + ".tiff")
             temp_img = skimage.io.imread(filename) 
             skimage.io.imsave(temp_file, temp_img)
             return temp_file
@@ -204,7 +207,7 @@ class PatchManager:
         """
         self.valid_patch_checks.append(patch_validity_check)
 
-    def mine_patches(self, output_directory, config, output_csv=None):
+    def mine_patches(self, config, output_csv=None):
         """
         Main loop of the program. This generates patch locations and attempts to save them until the slide is either
         saturated or the quota has been met.
@@ -225,7 +228,6 @@ class PatchManager:
             IF quota is met       ==> EXIT LOOP
         [REPEAT LOOP]
 
-        @param output_directory: Main directory which contains a folder for slide and label map patches (+ csv).
         @param n_patches: either an int for the number of patches, or -1 for mining until exhaustion.
         @param output_csv: The path of the output .csv to write. If none specified, put it in the output folder.
         @param n_jobs: Number of threads to launch.
@@ -251,11 +253,9 @@ class PatchManager:
             config['overlap_factor'] = 0.0
         value_map = config['value_map']
         
-        Path(output_directory).mkdir(parents=True, exist_ok=True)
-
         if output_csv is None:
             print("Creating output csv")
-            csv_filename = os.path.join(output_directory, "list.csv")
+            csv_filename = os.path.join(self.output_dir, "list.csv")
         else:
             csv_filename = output_csv
         output = open(csv_filename, "a")
@@ -289,7 +289,7 @@ class PatchManager:
                 if len(self.patches) != n_patches - n_completed:
                     print("Slide has reached saturation: No more non-overlapping patches to be found.\n"
                           "Change SHOW_MINED in config.py to True to see patch locations.\n"
-                          "Alternatively, change READ_TYPE to 'sequential' for greater mining effiency.")
+                          "Alternatively, change READ_TYPE to 'sequential' for greater mining efficiency.")
                     saturated = True
             # If there is no patch quota given, add patches until saturation.
             else:
@@ -303,11 +303,11 @@ class PatchManager:
                 if len(self.patches) != n_patches - n_completed:
                     print("Slide has reached saturation: No more non-overlapping patches to be found.\n"
                           "Change SHOW_MINED in config.py to True to see patch locations.\n"
-                          "Alternatively, change READ_TYPE to 'sequential' for greater mining effiency.")
+                          "Alternatively, change READ_TYPE to 'sequential' for greater mining efficiency.")
                     saturated = True
 
             # Save patches
-            output_dir_slide_folder = os.path.join(output_directory, self.slide_folder)
+            output_dir_slide_folder = os.path.join(self.output_dir, self.slide_folder)
             Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
             _save_patch_partial = partial(_save_patch,
                                         output_directory=output_dir_slide_folder,
@@ -341,7 +341,7 @@ class PatchManager:
                     self.label_map_patches.append(lm_patch)
 
                 print("Saving label maps:")
-                output_dir_mask_folder = os.path.join(output_directory, self.label_map_folder)
+                output_dir_mask_folder = os.path.join(self.output_dir, self.label_map_folder)
                 Path(output_dir_mask_folder).mkdir(parents=True, exist_ok=True)
                 
                 _lm_save_patch_partial = partial(_save_patch,
@@ -367,18 +367,15 @@ class PatchManager:
                 if self.save_subjectID:
                     output.write(self.subjectID + ",")
                 if self.label_map is not None:
-                    slide_patch_path = np_slide_futures[index, 1].get_patch_path(output_directory, False)
-                    lm_patch_path = np_lm_futures[index, 1].get_patch_path(output_directory, False)
+                    slide_patch_path = np_slide_futures[index, 1].get_patch_path(self.output_dir, False)
+                    lm_patch_path = np_lm_futures[index, 1].get_patch_path(self.output_dir, False)
                     lm_result = np_lm_futures[index, 2]
                     output.write("{},{},{}\n".format(slide_patch_path, lm_patch_path, lm_result))
                 else:
-                    path_path = np_slide_futures[index, 1].get_patch_path(output_directory, False)
+                    path_path = np_slide_futures[index, 1].get_patch_path(self.output_dir, False)
                     output.write("{}\n".format(path_path))
 
         output.close()
-
-        # delete temp directory
-        shutil.rmtree(str(self.temp_dir))
 
         print("Done!")
 
@@ -396,8 +393,7 @@ class PatchManager:
         patch_size = config['patch_size']
         n_jobs = config['num_workers']
 
-        Path(output_directory).mkdir(parents=True, exist_ok=True)
-        output_dir_slide_folder = os.path.join(output_directory, self.slide_folder)
+        output_dir_slide_folder = os.path.join(self.output_dir, self.slide_folder)
         Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
         # Todo, port to pandas or something more sophisticated?
         with open(patch_coord_csv, "r") as input_csv:
@@ -405,11 +401,12 @@ class PatchManager:
                 try:
                     x, y = [int(val) for val in line.split(",")]
                     
-                    _save_patch_partial = partial(_save_patch, output_directory=output_directory,
+                    _save_patch_partial = partial(_save_patch, output_directory=output_dir_slide_folder,
                                                   save=True,
                                                   check_if_valid=False)
 
                     patch = Patch(self.img_path, self.slide_object, self, [x, y], 0, patch_size, "_patch_{}-{}.png")
+                    patch.set_slide()
                     self.patches.append(patch)
 
                     if self.label_map is not None:
@@ -431,7 +428,7 @@ class PatchManager:
         print("Saving label maps:")
         if self.label_map is not None:
             _lm_save_patch_partial = partial(_save_patch,
-                                             output_directory=output_directory,
+                                             output_directory=output_dir_slide_folder,
                                              save=True,
                                              check_if_valid=False,
                                              patch_processor=get_patch_class_proportions,
