@@ -236,21 +236,9 @@ class PatchManager:
         """
 
         # initialize defaults
-        if not('num_patches' in config):
-            config['num_patches'] = -1
         n_patches = config['num_patches']
-        if not('num_workers' in config):
-            config['num_workers'] = 1
         n_jobs = config['num_workers']
-        if not('save_patches' in config):
-            config['save_patches'] = True
         save = config['save_patches']
-        if not('value_map' in config):
-            config['value_map'] = None
-        if not('read_type' in config):
-            config['read_type'] = "random"
-        if not('overlap_factor' in config):
-            config['overlap_factor'] = 0.0
         value_map = config['value_map']
         
         if output_csv is None:
