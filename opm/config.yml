@@ -16,10 +16,10 @@ num_workers : 1 # number of threads to use during computation; defaults to 1
 num_patches : 10 # -1 to mine until exhaustion, or a + int for number of patches; defaults to -1
 
 # RGB Masking
-pen_size_threshold   : 200
-min_color_difference : 30
-pen_mask_threshold   : 9
+pen_size_threshold   : 200 # thickness of pen strokes to be considered as a mask
+min_color_difference : 30  # color difference between tissue and pen markings
+# pen_mask_threshold   : 9 ## unused in the code right now
 
 # HSV Masking
-hsv_s_threshold : 15
-hsv_v_threshold : 90
+# hsv_s_threshold : 15 ## unused in the code right now
+# hsv_v_threshold : 90 ## unused in the code right now
