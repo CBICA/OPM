@@ -5,6 +5,7 @@ from skimage.morphology.selem import disk
 from skimage.morphology import remove_small_objects, remove_small_holes
 from skimage.color.colorconv import rgb2hsv
 import matplotlib.pyplot as plt
+import yaml
 
 # RGB Masking (pen) constants
 RGB_RED_CHANNEL = 0
@@ -172,3 +173,30 @@ def alpha_channel_check(img):
         return False
     else:
         return True
+
+
+def parse_config(config_file):
+    """
+    Parse config file and return a dictionary of config values.
+    :param config_file: path to config file
+    :return: dictionary of config values
+    """
+    config = yaml.load(open(config_file), Loader=yaml.FullLoader)
+
+    # initialize defaults
+    if not('scale' in config):
+        config['scale'] = 16
+    if not('num_patches' in config):
+        config['num_patches'] = -1
+    if not('num_workers' in config):
+        config['num_workers'] = 1
+    if not('save_patches' in config):
+        config['save_patches'] = True
+    if not('value_map' in config):
+        config['value_map'] = None
+    if not('read_type' in config):
+        config['read_type'] = "random"
+    if not('overlap_factor' in config):
+        config['overlap_factor'] = 0.0
+    
+    return config

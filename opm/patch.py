@@ -1,5 +1,5 @@
 from pathlib import Path
-from opm.utils import pass_method, map_values
+from .utils import pass_method, map_values
 import numpy as np
 from skimage.io import imsave
 from openslide import OpenSlide
@@ -23,7 +23,7 @@ class Patch:
         self.manager = manager
         self._slide_path = slide_path
         self.slide_object = slide_object
-        self.subfolder = slide_path[:slide_path.rindex(".")].split("/")[-1] + "/"
+        self.subfolder = Path(slide_path).stem
         self.coordinates = coordinates
         self.level = level
         self.size = size
@@ -57,15 +57,17 @@ class Patch:
         # Change slide path
         self._slide_path = slide_path
         # Re-assign subfolder within output folder
-        self.subfolder = Path(slide_path).stem + "/"
+        self.subfolder = Path(slide_path).stem
 
-    def get_patch_path(self, out_dir):
+    def get_patch_path(self, out_dir, create_dir=True):
         """
         Returns string of the path to where this patch will be saved.
         @param out_dir: The output directory
         @return: str
         """
         path = Path(self._slide_path)
+        if create_dir:
+            Path(out_dir, self.subfolder).mkdir(parents=True, exist_ok=True)
         return os.path.join(out_dir, self.subfolder, path.name.split(path.suffix)[0] + self.output_suffix.format(self.coordinates[0], self.coordinates[1]))
 
     def save(self, out_dir, save=True, check_if_valid=True, process_method=None, value_map=None):
@@ -74,7 +76,7 @@ class Patch:
         @param out_dir: Output directory for saving the patch. Supplied by patch_manager.py
         @param save: If False it will not write to disk. Helpful for debugging.
         @param check_if_valid: Run through checks supplied by manager. If rejected, don't save.
-        @param process_method: A method that takes an image as an imput and returns a string. Summarizes patch info.
+        @param process_method: A method that takes an image as an input and returns a string. Summarizes patch info.
             If left as None, it will use utils.pass_method() and return an empty string.
         @param value_map: Map key values in patch to alternate value. dict(key => value) where key, value are ints.
             alters the patch by substituting key for value in the image, leaves values not in dictionary unaltered.

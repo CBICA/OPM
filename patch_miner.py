@@ -10,17 +10,10 @@ from PIL import Image
 from pathlib import Path
 from functools import partial
 from opm.patch_manager import PatchManager
-from opm.utils import tissue_mask, alpha_channel_check, patch_size_check
+from opm.utils import tissue_mask, alpha_channel_check, patch_size_check, parse_config
 
 Image.MAX_IMAGE_PIXELS = None
 warnings.simplefilter("ignore")
-
-#
-# 1) Custom header support
-# 2) Replace , with :
-# 3) Refactor config to yaml
-# 4) Replace path multilation with os.path.join()
-
 
 
 def generate_initial_mask(slide_path, scale):
@@ -78,8 +71,6 @@ if __name__ == '__main__':
 
         do_save_patches = True
         out_dir = os.path.abspath(args.output_path)
-        if not out_dir.endswith("/"):
-            out_dir += "/"
     # Path to openslide supported file (.svs, .tiff, etc.)
     slide_path = os.path.abspath(args.input_path)
 
@@ -87,8 +78,8 @@ if __name__ == '__main__':
         raise ValueError("Could not find the slide, could you recheck the path?")
 
     # Create new instance of slide manager
-    manager = PatchManager(slide_path)
-    cfg = yaml.load(open(args.config), Loader=yaml.FullLoader)
+    manager = PatchManager(slide_path, args.output_path)
+    cfg = parse_config(args.config)
 
     if args.input_csv is None:
         # Generate an initial validity mask
@@ -103,8 +94,8 @@ if __name__ == '__main__':
         patch_dims_check = partial(patch_size_check, patch_height=cfg['patch_size'][0], patch_width=cfg['patch_size'][1])
         manager.add_patch_criteria(patch_dims_check)
         # Save patches releases saves all patches stored in manager, dumps to specified output file
-        manager.mine_patches(out_dir, output_csv=args.output_csv, config=cfg)
+        manager.mine_patches(output_csv=args.output_csv, config=cfg)
         print("Total time: {}".format(time.time() - start))
     else:
-        manager.save_predefined_patches(out_dir, patch_coord_csv=args.input_csv, config=cfg)
+        manager.save_predefined_patches(patch_coord_csv=args.input_csv, config=cfg)
 

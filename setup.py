@@ -12,12 +12,13 @@ requirements = [
     'pandas',
     'wheel',
     'twine',
-    'keyring'
+    'keyring',
+    'pyyaml',
 ]
 
 setup(
     name='OpenPatchMiner',
-    version='0.1.4',
+    version='0.1.5',
     python_requires='>=3.6',
     packages=find_packages(),
     install_requires=requirements,
@@ -39,6 +40,6 @@ setup(
     long_description=readme,
     long_description_content_type='text/markdown',
     include_package_data=True,
-    keywords='histopathylogy, patch, miner',
+    keywords='histopathology, patch, miner',
     zip_safe=False,
 )
