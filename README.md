@@ -33,7 +33,7 @@ pip install .
 To try an example:
 ```powershell
 # continue from virtual environment shell
-python patch_miner.py -i images/example_slide.tiff -lm images/example_lm.tiff -o example
+python patch_miner.py -i images/example_slide.tiff -lm images/example_lm.tiff -o example -c opm/config.yml
 ```
 By default it detects tissue and extracts 1000 random patches from the included .svs file. Play with this number as well as the number of parallel threads in example.py (default patches=1000, default threads=100)
 ## Options
