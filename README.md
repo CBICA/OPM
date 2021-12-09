@@ -68,6 +68,10 @@ OPM follows the following workflow:
 ```
 
 ## Changelog
+Dec. 9, 2021:
+- Changed backend to Pandas.
+- Updated README
+
 Nov. 17, 2020:
 - Added support for mining patches from label map along with the slide.
 - Updated README
