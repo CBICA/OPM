@@ -30,6 +30,8 @@ class PatchManager:
         self.subjectID = None
         self.save_subjectID = False
         self.output_dir = output_dir
+        self.image_header = "SlidePatchPath"
+        self.mask_header = "LabelMapPatchPath"
         Path(output_dir).mkdir(parents=True, exist_ok=True)
 
 
@@ -206,6 +208,12 @@ class PatchManager:
         """
         self.valid_patch_checks.append(patch_validity_check)
 
+    def set_image_header(self, image_header):
+        self.image_header = image_header
+
+    def set_mask_header(self, mask_header):
+        self.mask_header = mask_header
+
     def mine_patches(self, config, output_csv=None):
         """
         Main loop of the program. This generates patch locations and attempts to save them until the slide is either
@@ -246,24 +254,12 @@ class PatchManager:
         else:
             csv_filename = output_csv
 
-
-        header = []
-        if self.save_subjectID:
-            header += ["SubjectID"]
-        if self.label_map is not None:
-            header += ["SlidePatchPath", "LabelMapPatchPath", "PatchComposition"]
-        else:
-            header += ["Slide Patch path"]
-
-        csv_already_exists = False
         try:
             if os.path.exists(csv_filename) and os.path.isfile(csv_filename):
-                csv_already_exists = True
                 output_df = pd.read_csv(csv_filename)
             else:
                 output_df = pd.DataFrame()
         except pd.errors.EmptyDataError as e:
-            csv_already_exists = False
             output_df = pd.DataFrame()
 
 
@@ -375,8 +371,8 @@ class PatchManager:
                     slide_patch_path = np_slide_futures[index, 1].get_patch_path(self.output_dir, False)
                     lm_patch_path = np_lm_futures[index, 1].get_patch_path(self.output_dir, False)
                     lm_result = np_lm_futures[index, 2]
-                    new_row.update({"SlidePatchPath": slide_patch_path,
-                                        "LabelMapPatchPath": lm_patch_path,
+                    new_row.update({self.image_header: slide_patch_path,
+                                        self.mask_header: lm_patch_path,
                                         "PatchComposition": lm_result})
                 else:
                     slide_patch_path = np_slide_futures[index, 1].get_patch_path(self.output_dir, False)
