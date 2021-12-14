@@ -6,7 +6,7 @@
     <a href="https://dev.azure.com/CBICA/OPM/_build?definitionId=15" alt="Windows_3.6"><img src="https://dev.azure.com/CBICA/OPM/_apis/build/status/OPM-CI?branchName=master" /></a>
 </p>
 
-### Openslide patch manager: parallel reading/writing of patches.
+### Open Patch Manager: parallel reading/writing of patches.
 
 ## Installation: 
 
@@ -33,7 +33,7 @@ pip install .
 To try an example:
 ```powershell
 # continue from virtual environment shell
-python patch_miner.py -i images/example_slide.tiff -lm images/example_lm.tiff -o example
+python patch_miner.py -i images/example_slide.tiff -lm images/example_lm.tiff -o example -c opm/config.yml
 ```
 By default it detects tissue and extracts 1000 random patches from the included .svs file. Play with this number as well as the number of parallel threads in example.py (default patches=1000, default threads=100)
 ## Options
@@ -68,6 +68,10 @@ OPM follows the following workflow:
 ```
 
 ## Changelog
+Dec. 9, 2021:
+- Changed backend to Pandas.
+- Updated README
+
 Nov. 17, 2020:
 - Added support for mining patches from label map along with the slide.
 - Updated README

@@ -6,10 +6,10 @@ from .utils import get_patch_class_proportions
 import numpy as np
 import openslide
 from tqdm import tqdm
-import tempfile
 from pathlib import Path
 import skimage.io
-import shutil
+import pandas as pd
+
 
 class PatchManager:
     def __init__(self, filename, output_dir):
@@ -246,13 +246,22 @@ class PatchManager:
             csv_filename = os.path.join(self.output_dir, "list.csv")
         else:
             csv_filename = output_csv
-        output = open(csv_filename, "a")
+
+
+        header = []
         if self.save_subjectID:
-            output.write("SubjectID,")
+            header += ["SubjectID"]
         if self.label_map is not None:
-            output.write("SlidePatchPath,LabelMapPatchPath,PatchComposition\n") 
+            header += ["SlidePatchPath", "LabelMapPatchPath", "PatchComposition"]
         else:
-            output.write("Slide Patch path\n")
+            header += ["Slide Patch path"]
+
+        csv_already_exists = False
+        if os.path.exists(csv_filename) and os.path.isfile(csv_filename):
+            csv_already_exists = True
+            output_df = pd.read_csv(csv_filename)
+        else:
+            output_df = pd.DataFrame()
 
         if n_patches == -1:
             n_patches = np.Inf
@@ -351,19 +360,29 @@ class PatchManager:
             print("{}/{} valid patches found in this run.".format(successful, n_patches))
             n_completed += successful
 
+            new_df_rows = []
             for index in successful_indices:
+                new_row = {}
                 if self.save_subjectID:
-                    output.write(self.subjectID + ",")
+                    new_row.update({"SubjectID": self.subjectID})
                 if self.label_map is not None:
                     slide_patch_path = np_slide_futures[index, 1].get_patch_path(self.output_dir, False)
                     lm_patch_path = np_lm_futures[index, 1].get_patch_path(self.output_dir, False)
                     lm_result = np_lm_futures[index, 2]
-                    output.write("{},{},{}\n".format(slide_patch_path, lm_patch_path, lm_result))
+                    new_row.update({"SlidePatchPath": slide_patch_path,
+                                        "LabelMapPatchPath": lm_patch_path,
+                                        "PatchComposition": lm_result})
                 else:
-                    path_path = np_slide_futures[index, 1].get_patch_path(self.output_dir, False)
-                    output.write("{}\n".format(path_path))
+                    slide_patch_path = np_slide_futures[index, 1].get_patch_path(self.output_dir, False)
+                    new_row.update({"SlidePatchPath": slide_patch_path})
+                new_df_rows.append(new_row)
 
-        output.close()
+            new_df = pd.DataFrame(new_df_rows)
+            output_df = pd.concat([output_df, new_df])  # Concatenate in case there is a pre-existing dataframe
+
+
+        output_df.to_csv(csv_filename, index=False)
+
 
         print("Done!")
 
@@ -394,7 +413,6 @@ class PatchManager:
                                                   check_if_valid=False)
 
                     patch = Patch(self.img_path, self.slide_object, self, [x, y], 0, patch_size, "_patch_{}-{}.png")
-                    patch.set_slide()
                     self.patches.append(patch)
 
                     if self.label_map is not None:
