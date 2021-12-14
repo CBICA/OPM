@@ -29,6 +29,9 @@ def generate_initial_mask(slide_path, scale):
 
     # Call thumbnail for effiency, calculate scale relative to whole slide
     slide_thumbnail = np.asarray(slide.get_thumbnail((slide_dims[0] // scale, slide_dims[1] // scale)))
+    import matplotlib.pyplot as plt
+    plt.imshow(slide_thumbnail)
+    plt.show()
     real_scale = (slide_dims[0] / slide_thumbnail.shape[1], slide_dims[1] / slide_thumbnail.shape[0])
 
     return tissue_mask(slide_thumbnail), real_scale
@@ -84,6 +87,9 @@ if __name__ == '__main__':
     if args.input_csv is None:
         # Generate an initial validity mask
         mask, scale = generate_initial_mask(args.input_path, cfg['scale'])
+        import matplotlib.pyplot as plt
+        plt.imshow(mask)
+        plt.show()
         manager.set_valid_mask(mask, scale)
         if args.label_map_path is not None:
             manager.set_label_map(args.label_map_path)
