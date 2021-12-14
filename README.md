@@ -21,7 +21,7 @@ pip install OpenPatchMiner
 
 ### For OPM Development
 ```powershell
-git clone https://github.com/grenkoca/OPM.git
+git clone https://github.com/CBICA/OPM.git
 cd OPM/
 conda create -p ./venv python=3.8.12 -y
 conda activate ./venv
@@ -67,6 +67,13 @@ OPM follows the following workflow:
 ```
 
 ## Changelog
+Dec. 9, 2021:
+- Replaced slide library with tifffile
+- Made barebones OpenSlide mimic with tifffile, named SlideObject
+- Updated requirements, bumped minimum python from 3.6 --> 3.8 (due to zarr requirements)
+- Updated README
+
+
 Dec. 9, 2021:
 - Changed backend to Pandas.
 - Updated README
