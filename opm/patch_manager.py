@@ -9,7 +9,6 @@ from tqdm import tqdm
 from pathlib import Path
 import skimage.io
 import pandas as pd
-import matplotlib.pyplot as plt
 
 class PatchManager:
     def __init__(self, filename, output_dir):
@@ -317,8 +316,6 @@ class PatchManager:
                                         check_if_valid=True)
             
             print("Saving patches:")
-            plt.imshow(self.mined_mask)
-            plt.show()
 
             with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
                 np_slide_futures = list(

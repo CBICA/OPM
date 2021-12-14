@@ -4,7 +4,6 @@ with open('README.md') as readme_file:
   readme = readme_file.read()
 
 requirements = [
-    'openslide-python',
     'scikit-image',
     'matplotlib',
     'numpy',
@@ -14,6 +13,8 @@ requirements = [
     'twine',
     'keyring',
     'pyyaml',
+    'zarr',
+    'tifffile'
 ]
 
 setup(
