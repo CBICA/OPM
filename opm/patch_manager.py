@@ -247,15 +247,6 @@ class PatchManager:
         else:
             csv_filename = output_csv
 
-
-        header = []
-        if self.save_subjectID:
-            header += ["SubjectID"]
-        if self.label_map is not None:
-            header += ["SlidePatchPath", "LabelMapPatchPath", "PatchComposition"]
-        else:
-            header += ["SlidePatchPath"]
-
         if os.path.exists(csv_filename) and os.path.isfile(csv_filename):
             output_df = pd.read_csv(csv_filename)
         else:
