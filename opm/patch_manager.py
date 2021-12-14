@@ -254,11 +254,9 @@ class PatchManager:
         if self.label_map is not None:
             header += ["SlidePatchPath", "LabelMapPatchPath", "PatchComposition"]
         else:
-            header += ["Slide Patch path"]
+            header += ["SlidePatchPath"]
 
-        csv_already_exists = False
         if os.path.exists(csv_filename) and os.path.isfile(csv_filename):
-            csv_already_exists = True
             output_df = pd.read_csv(csv_filename)
         else:
             output_df = pd.DataFrame()
