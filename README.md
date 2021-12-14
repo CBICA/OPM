@@ -12,7 +12,7 @@
 
 ### For Usage Only
 ```powershell
-conda create -p ./venv python=3.6.5 -y
+conda create -p ./venv python=3.8.12 -y
 conda activate ./venv
 pip install OpenPatchMiner
 ## alternate
@@ -23,7 +23,7 @@ pip install OpenPatchMiner
 ```powershell
 git clone https://github.com/grenkoca/OPM.git
 cd OPM/
-conda create -p ./venv python=3.6.5 -y
+conda create -p ./venv python=3.8.12 -y
 conda activate ./venv
 pip install .
 ```

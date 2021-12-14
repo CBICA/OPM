@@ -14,7 +14,8 @@ requirements = [
     'keyring',
     'pyyaml',
     'zarr',
-    'tifffile'
+    'tifffile',
+    'imagecodecs'
 ]
 
 setup(
