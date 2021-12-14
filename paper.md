@@ -51,8 +51,8 @@ patches from and will mine either a predetermined number of patches, or will min
 patches can be called without the allowed overlap.
 
 # Method
-Open Patch Miner has the following general workflow:
-<img src="images/opm_flowchart.png" alt="Workflow for Open Patch Miner" width="600"/>
+Open Patch Miner has the following general workflow:  
+<img src="images/opm_flowchart.png" alt="Workflow for Open Patch Miner" width="600"/>  
 Once initialized, OPM begins by masking out background whitespace, pen markings, and other artifacts 
 as defined by user settings. This generates a binary mask of valid/invalid candidate regions. 
 Next, the desired number of patches are read, and each patch is passed through a series of user-defined
