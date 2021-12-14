@@ -4,3 +4,4 @@ venv
 OpenPatchMiner.egg*
 .vscode/*
 images/output/*
+dist/*
