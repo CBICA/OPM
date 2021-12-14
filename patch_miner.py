@@ -4,13 +4,13 @@ import numpy as np
 import warnings
 import yaml
 import os
-import openslide
 
 from PIL import Image
 from pathlib import Path
 from functools import partial
 from opm.patch_manager import PatchManager
 from opm.utils import tissue_mask, alpha_channel_check, patch_size_check, parse_config
+from opm.SlideObject import open_slide
 
 Image.MAX_IMAGE_PIXELS = None
 warnings.simplefilter("ignore")
@@ -24,7 +24,7 @@ def generate_initial_mask(slide_path, scale):
     :return: list of n (x,y) coordinates
     """
     # Open slide and get properties
-    slide = openslide.open_slide(slide_path)
+    slide = open_slide(slide_path)
     slide_dims = slide.dimensions
 
     # Call thumbnail for effiency, calculate scale relative to whole slide
