@@ -32,65 +32,37 @@ bibliography: paper.bib
 The transition of histopathology from analog to digital has opened the world 
 of medicine to new classes of algorithms aimed at aiding typical pathological
 analysis. Histopathology images can be gigapixel sized, rendering loading 
-the whole image into memory is typically infeasible. To compensate for these
-large sizes, most algorithms resort to using small patches called from the images.
-Despite patch extraction being requisite for applying algorithms to digital pathology,
-there are very few applications capable of easy patch extraction while still 
-allowing for user-defined processes and checks. Open Patch Miner (OPM) provides a 
-high-level library capable of tissue detection, parallel patch extraction, 
-validation, and saving. Additionally, OPM's modular design allows for user-defined
-algorithms for tissue detection and patch validation.
+the whole image into memory is typically infeasible. To work around this
+limitation, researchers typically extract small square sections of the whole slide
+in order to train algorithms. 
 
 # Statement of need
+Despite patch extraction being requisite for applying algorithms to digital 
+pathology, there are very few applications which automatically generate small patches
+from the entire image. Additionally, accompanying information must be saved with patches.
+This includes, but is not limited to, the coordinates of patches, the associated patient 
+information, corresponding segmentation maps, and pixel classes represented in the patches.
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+Open Patch Miner (OPM) provides a high-level library capable of tissue detection, 
+parallel patch extraction, validation, and saving of patches. It has a modular nature, allowing 
+for users to define custom checks to determine which patches should be saved, and where patches
+should be mined from. Additionally, OPM can automatically determine candidate regions to call
+patches from and will mine either a predetermined number of patches, or will mine until no more 
+patches can be called without the allowed overlap.
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+# Method
+Open Patch Miner has the following general workflow:
+<img src="images/opm_flowchart.png" alt="Workflow for Open Patch Miner" width="600"/>
+Once initialized, OPM begins by masking out background whitespace, pen markings, and other artifacts 
+as defined by user settings. This generates a binary mask of valid/invalid candidate regions. 
+Next, the desired number of patches are read, and each patch is passed through a series of user-defined
+checks. If a patch passes all checks, it is saved and the associated information is recorded. If not, 
+the patch is rejected. If either the required number of patches have been saved or no more candidate pixels
+exit, OPM exits. If the patch quota has not been achieved and there is still potential regions 
+for patch extraction, OPM will resume. If there are no more candidate patches, OPM will determine the 
+slide is saturated and exit.
 
-# Mathematics
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
 
 # Acknowledgements
 
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
-
-# References
+We acknowledge contributions from Caleb Grenko, Sarthak Pati, Siddhesh Thakur, and Spyridon Bakas.
