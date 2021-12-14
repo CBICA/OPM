@@ -6,6 +6,9 @@ from skimage.morphology import remove_small_objects, remove_small_holes
 from skimage.color.colorconv import rgb2hsv
 import matplotlib.pyplot as plt
 import yaml
+import zarr
+from tifffile import imread
+
 
 # RGB Masking (pen) constants
 RGB_RED_CHANNEL = 0
@@ -159,7 +162,9 @@ def trim_mask(image, mask, background_value=0, mask_func=hybrid_mask):
 
 
 def patch_size_check(img, patch_height, patch_width):
-    if img.size[0] != patch_height or img.size[1] != patch_width:
+    img = np.asarray(img)
+
+    if img.shape[0] != patch_height or img.shape[1] != patch_width:
         return False
     else:
         return True
@@ -167,12 +172,23 @@ def patch_size_check(img, patch_height, patch_width):
 
 def alpha_channel_check(img):
     img = np.asarray(img)
-    alpha_channel = img[:, :, 3]
-
-    if np.any(alpha_channel != 255):
-        return False
-    else:
+    # If the image has three dimensions AND there is no alpha_channel...
+    if len(img.shape) == 3 and img.shape[-1] == 3:
         return True
+    # If the image has three dimensions AND ther IS an alpha channel...
+    elif len(img.shape) == 3 and img.shape[-1] == 4:
+        alpha_channel = img[:, :, 3]
+
+        if np.any(alpha_channel != 255):
+            return False
+        else:
+            return True
+    # If the image is two dims, return True
+    elif len(img.shape) == 2:
+        return True
+    # Other images (4D, RGBA+____, etc.), return False.
+    else:
+        return False
 
 
 def parse_config(config_file):

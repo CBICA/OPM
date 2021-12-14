@@ -1,14 +1,14 @@
 from pathlib import Path
 from .utils import pass_method, map_values
+from .SlideObject import open_slide
 import numpy as np
 from skimage.io import imsave
-from openslide import OpenSlide
 import os
 from pathlib import Path
-
+from zarr.core import Array
 
 class Patch:
-    def __init__(self, slide_path: str, slide_object: OpenSlide, manager, coordinates, level: int,
+    def __init__(self, slide_path: str, slide_object: Array, manager, coordinates, level: int,
                  size: tuple, output_suffix: str = "_patch@{}:{}.png") -> None:
         """
         Init for Patch.
@@ -93,6 +93,7 @@ class Patch:
         if check_if_valid:
             for check_function in self.manager.valid_patch_checks:
                 if not check_function(patch):
+                    print("Patch failed check", check_function)
                     return [False, self, ""]
 
         try:
@@ -106,7 +107,10 @@ class Patch:
                     )
                 elif value_map is None:
                     patch = self.read_patch()
-                    patch.save(fp=self.get_patch_path(out_dir))
+                    imsave(
+                        fname=self.get_patch_path(out_dir),
+                        arr=patch
+                    )
 
 
             return [True, self, process_method(patch)]

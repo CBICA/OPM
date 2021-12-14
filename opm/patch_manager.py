@@ -3,13 +3,12 @@ import os
 from functools import partial
 from .patch import Patch
 from .utils import get_patch_class_proportions
+from .SlideObject import open_slide
 import numpy as np
-import openslide
 from tqdm import tqdm
 from pathlib import Path
 import skimage.io
 import pandas as pd
-
 
 class PatchManager:
     def __init__(self, filename, output_dir):
@@ -63,9 +62,9 @@ class PatchManager:
         @param path: path to label map.
         """
         self.label_map = self.convert_to_tiff(path, "mask")
-        self.label_map_object = openslide.open_slide(self.label_map)
+        self.label_map_object = open_slide(self.label_map)
         self.img_path = self.convert_to_tiff(self.img_path, "img")
-        self.slide_object = openslide.open_slide(self.img_path)
+        self.slide_object = open_slide(self.img_path)
         self.slide_dims = self.slide_object.dimensions
         
         assert all(x == y for x, y in zip(self.label_map_object.dimensions, self.slide_dims)), \
@@ -255,10 +254,14 @@ class PatchManager:
         else:
             csv_filename = output_csv
 
-        if os.path.exists(csv_filename) and os.path.isfile(csv_filename):
-            output_df = pd.read_csv(csv_filename)
-        else:
+        try:
+            if os.path.exists(csv_filename) and os.path.isfile(csv_filename):
+                output_df = pd.read_csv(csv_filename)
+            else:
+                output_df = pd.DataFrame()
+        except pd.errors.EmptyDataError as e:
             output_df = pd.DataFrame()
+
 
         if n_patches == -1:
             n_patches = np.Inf
@@ -309,6 +312,7 @@ class PatchManager:
                                         check_if_valid=True)
             
             print("Saving patches:")
+
             with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
                 np_slide_futures = list(
                     tqdm(
@@ -317,6 +321,7 @@ class PatchManager:
                         unit="pchs",
                     )
                 )
+
 
                 self.patches = list()
                 np_slide_futures = np.array(np_slide_futures)
