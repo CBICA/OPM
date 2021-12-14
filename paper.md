@@ -17,6 +17,9 @@ authors:
   - name: Siddhesh Thakur
     orcid: 0000-0003-4807-2495
     affiliation: 2
+  - name: Spyridon Bakas
+    orcid: 0000-0001-8734-6482
+    affiliation: 2
 affiliations:
  - name: National Human Genome Research Association (NHGRI), National Institutes of Health (NIH), 31 Center Dr, Bethesda, MD 20894
    index: 1
