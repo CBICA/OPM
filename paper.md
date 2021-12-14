@@ -58,7 +58,6 @@ patches can be called without the allowed overlap.
 
 # Method
 
-<img src="images/opm_flowchart.png" alt="Workflow for Open Patch Miner" width="600"/>  
 ![Open Patch Miner has the following general workflow.\label{fig:flowchart}](./images/opm_flowchart.png)
 
 Once initialized, OPM begins by masking out background whitespace, pen markings, and other artifacts 
