@@ -13,8 +13,8 @@ requirements = [
     'twine',
     'keyring',
     'pyyaml',
-    'zarr',
-    'tifffile'
+    'zarr==2.10.3',
+    'tifffile==2021.3.17'
 ]
 
 setup(
