@@ -3,3 +3,4 @@ src/__pycache__
 venv
 OpenPatchMiner.egg*
 .vscode/*
+images/output/*
