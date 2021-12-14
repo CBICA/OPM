@@ -40,6 +40,7 @@ limitation, researchers typically extract small square sections of the whole sli
 in order to train algorithms. 
 
 # Statement of need
+
 Despite patch extraction being requisite for applying algorithms to digital 
 pathology, there are very few applications which automatically generate small patches
 from the entire image. Additionally, accompanying information must be saved with patches.
@@ -54,8 +55,10 @@ patches from and will mine either a predetermined number of patches, or will min
 patches can be called without the allowed overlap.
 
 # Method
-Open Patch Miner has the following general workflow:  
+
 <img src="images/opm_flowchart.png" alt="Workflow for Open Patch Miner" width="600"/>  
+![Open Patch Miner has the following general workflow.\label{fig:flowchart}](./images/opm_flowchart.png)
+
 Once initialized, OPM begins by masking out background whitespace, pen markings, and other artifacts 
 as defined by user settings. This generates a binary mask of valid/invalid candidate regions. 
 Next, the desired number of patches are read, and each patch is passed through a series of user-defined
@@ -63,7 +66,7 @@ checks. If a patch passes all checks, it is saved and the associated information
 the patch is rejected. If either the required number of patches have been saved or no more candidate pixels
 exit, OPM exits. If the patch quota has not been achieved and there is still potential regions 
 for patch extraction, OPM will resume. If there are no more candidate patches, OPM will determine the 
-slide is saturated and exit.
+slide is saturated and exit. The overall flowchart is illustrated in \autoref{fig:flowchart}.
 
 
 # Acknowledgements
