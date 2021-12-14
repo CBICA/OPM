@@ -39,6 +39,7 @@ the whole image into memory is typically infeasible. To work around this
 limitation, researchers typically extract small square sections of the whole slide
 in order to train algorithms. 
 
+
 # Statement of need
 
 Despite patch extraction being requisite for applying algorithms to digital 
@@ -53,6 +54,7 @@ for users to define custom checks to determine which patches should be saved, an
 should be mined from. Additionally, OPM can automatically determine candidate regions to call
 patches from and will mine either a predetermined number of patches, or will mine until no more 
 patches can be called without the allowed overlap.
+
 
 # Method
 
