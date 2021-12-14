@@ -67,7 +67,7 @@ OPM follows the following workflow:
 ```
 
 ## Changelog
-Dec. 9, 2021:
+Dec. 14, 2021:
 - Replaced slide library with tifffile
 - Made barebones OpenSlide mimic with tifffile, named SlideObject
 - Updated requirements, bumped minimum python from 3.6 --> 3.8 (due to zarr requirements)
