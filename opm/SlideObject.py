@@ -20,8 +20,3 @@ class SlideObject(zarr.hierarchy.Group):
     def get_thumbnail(self, size):
         stride = self.dimensions[0] // size[0], self.dimensions[1] // size[1]
         return self.arr[0][::stride[1], ::stride[0]]
-
-
-
-
-
