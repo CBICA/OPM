@@ -9,7 +9,7 @@ from PIL import Image
 from pathlib import Path
 from functools import partial
 from opm.patch_manager import PatchManager
-from opm.utils import tissue_mask, alpha_channel_check, patch_size_check, parse_config, generate_initial_mask
+from opm.utils import alpha_channel_check, patch_size_check, parse_config, generate_initial_mask
 
 Image.MAX_IMAGE_PIXELS = None
 warnings.simplefilter("ignore")
