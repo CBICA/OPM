@@ -1,7 +1,7 @@
 import numpy as np
 from skimage.filters.rank import maximum
 from skimage.filters import gaussian
-from skimage.morphology.selem import disk
+from skimage.morphology.footprints import disk
 from skimage.morphology import remove_small_objects, remove_small_holes
 from skimage.color.colorconv import rgb2hsv
 import matplotlib.pyplot as plt
