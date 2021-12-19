@@ -6,8 +6,7 @@ from skimage.morphology import remove_small_objects, remove_small_holes
 from skimage.color.colorconv import rgb2hsv
 import matplotlib.pyplot as plt
 import yaml
-import zarr
-from tifffile import imread
+from opm.SlideObject import open_slide
 
 
 # RGB Masking (pen) constants
@@ -216,3 +215,21 @@ def parse_config(config_file):
         config['overlap_factor'] = 0.0
     
     return config
+
+
+def generate_initial_mask(slide_path, scale):
+    """
+    Helper method to generate random coordinates within a slide
+    :param slide_path: Path to slide (str)
+    :param num_patches: Number of patches you want to generate
+    :return: list of n (x,y) coordinates
+    """
+    # Open slide and get properties
+    slide = open_slide(slide_path)
+    slide_dims = slide.dimensions
+
+    # Call thumbnail for effiency, calculate scale relative to whole slide
+    slide_thumbnail = np.asarray(slide.get_thumbnail((slide_dims[0] // scale, slide_dims[1] // scale)))
+    real_scale = (slide_dims[0] / slide_thumbnail.shape[1], slide_dims[1] / slide_thumbnail.shape[0])
+
+    return tissue_mask(slide_thumbnail), real_scale

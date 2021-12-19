@@ -9,29 +9,10 @@ from PIL import Image
 from pathlib import Path
 from functools import partial
 from opm.patch_manager import PatchManager
-from opm.utils import tissue_mask, alpha_channel_check, patch_size_check, parse_config
-from opm.SlideObject import open_slide
+from opm.utils import alpha_channel_check, patch_size_check, parse_config, generate_initial_mask
 
 Image.MAX_IMAGE_PIXELS = None
 warnings.simplefilter("ignore")
-
-
-def generate_initial_mask(slide_path, scale):
-    """
-    Helper method to generate random coordinates within a slide
-    :param slide_path: Path to slide (str)
-    :param num_patches: Number of patches you want to generate
-    :return: list of n (x,y) coordinates
-    """
-    # Open slide and get properties
-    slide = open_slide(slide_path)
-    slide_dims = slide.dimensions
-
-    # Call thumbnail for effiency, calculate scale relative to whole slide
-    slide_thumbnail = np.asarray(slide.get_thumbnail((slide_dims[0] // scale, slide_dims[1] // scale)))
-    real_scale = (slide_dims[0] / slide_thumbnail.shape[1], slide_dims[1] / slide_thumbnail.shape[0])
-
-    return tissue_mask(slide_thumbnail), real_scale
 
 
 if __name__ == '__main__':
