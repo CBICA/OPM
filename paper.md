@@ -49,7 +49,7 @@ Once initialized, OPM begins by masking out background whitespace, pen markings,
 
 # Acknowledgements
 
-We acknowledge contributions from Caleb Grenko, Sarthak Pati, Siddhesh Thakur, and Spyridon Bakas.
+This work was partly supported by the National Institutes of Health (NIH) under award number NIH/NCI:U01CA242871.
 
 
 # References
