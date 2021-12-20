@@ -21,14 +21,14 @@ authors:
     orcid: 0000-0001-8734-6482
     affiliation: "1, 2, 3"
 affiliations:
- - name: Center for Biomedical Image Computing and Analytics (CBICA), University of Pennsylvania, Philadelphia, PA, USA
-   index: 1
-- name: Department of Pathology and Laboratory Medicine, Perelman School of Medicine, University of Pennsylvania, Philadelphia, PA, USA
-   index: 2
-- name: Department of Radiology, Perelman School of Medicine, University of Pennsylvania, Philadelphia, PA, USA
-   index: 3
-- name: Department of Informatics, Technical University of Munich, Munich, Bavaria, Germany
-   index: 4
+  - name: Center for Biomedical Image Computing and Analytics (CBICA), University of Pennsylvania, Philadelphia, PA, USA
+    index: 1
+  - name: Department of Pathology and Laboratory Medicine, Perelman School of Medicine, University of Pennsylvania, Philadelphia, PA, USA
+    index: 2
+  - name: Department of Radiology, Perelman School of Medicine, University of Pennsylvania, Philadelphia, PA, USA
+    index: 3
+  - name: Department of Informatics, Technical University of Munich, Munich, Bavaria, Germany
+    index: 4
 date: 20 December 2021
 bibliography: paper.bib
 
