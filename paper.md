@@ -13,7 +13,7 @@ authors:
     affiliation: 1 # (Multiple affiliations must be quoted)
   - name: Sarthak Pati
     orcid: 0000-0003-2243-8487
-    affiliation: "1, 2, 3"
+    affiliation: "1, 2, 3, 4"
   - name: Siddhesh Thakur
     orcid: 0000-0003-4807-2495
     affiliation: "1"
@@ -27,6 +27,8 @@ affiliations:
    index: 2
 - name: Department of Radiology, Perelman School of Medicine, University of Pennsylvania, Philadelphia, PA, USA
    index: 3
+- name: Department of Informatics, Technical University of Munich, Munich, Bavaria, Germany
+   index: 4
 date: 13 December 2021
 bibliography: paper.bib
 
