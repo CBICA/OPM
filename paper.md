@@ -10,13 +10,13 @@ tags:
 authors:
   - name: Caleb M. Grenko
     orcid: 0000-0002-3926-5503
-    affiliation: 1 # (Multiple affiliations must be quoted)
+    affiliation: "1, 2" # (Multiple affiliations must be quoted)
   - name: Sarthak Pati
     orcid: 0000-0003-2243-8487
     affiliation: "1, 2, 3, 4"
   - name: Siddhesh Thakur
     orcid: 0000-0003-4807-2495
-    affiliation: "1"
+    affiliation: "1, 2"
   - name: Spyridon Bakas
     orcid: 0000-0001-8734-6482
     affiliation: "1, 2, 3"
