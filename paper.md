@@ -36,7 +36,7 @@ bibliography: paper.bib
 
 # Summary
 
-The transition of histopathology from glass slides to digitized whole slide images (WSIs) has opened the world of medicine to new classes of computational algorithms aimed at aiding routine clinical pathological analysis. The size of WSIs can be quite large, which means that rendering the whole image into memory at once is typically infeasible. To work around this limitation, researchers typically extract small square sections (i.e. patches) of the whole slide in order to train algorithms. 
+The transition of histopathology from glass slides to digitized whole slide images (WSIs) has opened the world of medicine to new classes of computational algorithms aimed at aiding routine clinical pathological analysis. The size of WSIs can be quite large, which means that rendering the whole image into memory at once is typically infeasible. To work around this limitation, researchers typically extract small square sections (i.e. patches) of the whole slide in order to train algorithms. Towards this end, the Open Patch Miner offers a robust, reproducible, comprehensive solution to researchers working on the field of computational pathology.
 
 
 # Statement of need
