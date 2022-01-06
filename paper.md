@@ -1,5 +1,5 @@
 ---
-title: 'Open Patch Miner: parallel reading/writing of patches for digital histopathology'
+title: 'Open Patch Miner: Comprehensive parallel reading and writing of tissue patches for computational histopathology'
 tags:
   - Python
   - histopathology
