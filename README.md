@@ -44,7 +44,7 @@ There are also a handful of useful options:
 ## Workflow
 OPM follows the following workflow:
 
-<img src="images/opm_flowchart.png" alt="Workflow for Open Patch Miner" width="600"/>
+<img src="images/OPM_flowchart.png" alt="Workflow for Open Patch Miner" width="600"/>
 
 ## Project Structure
 ```
