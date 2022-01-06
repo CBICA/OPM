@@ -50,7 +50,7 @@ Open Patch Miner (OPM) provides a high-level library capable of tissue detection
 
 ![Open Patch Miner has the following general workflow.\label{fig:flowchart}](./images/opm_flowchart.png)
 
-Once initialized, OPM begins by masking out background whitespace, pen markings, and other artifacts as defined by user settings. This generates a binary mask which defines the valid candidate regions within the image. Next, the desired number of patches are read, and each patch is passed through a series of user-defined checks. If a patch passes all checks, it is saved along with all associated information. This process continues until either the required number of patches have been saved or no more patches exist in the valid candidate regions of the image. The overall flowchart is illustrated in \autoref{fig:flowchart}.
+Once initialized, OPM begins by masking out background whitespace, pen markings, and other artifacts as defined by user settings. This generates a binary mask which defines the valid candidate regions within the image. Next, the desired number of patches are read, and each patch is passed through a series of user-defined checks. If a patch passes all checks, it is saved along with all associated information. This process continues until either the required number of patches have been saved or no more patches exist in the valid candidate regions of the image. Additionally, if the user inputs a pre-existing .csv of coordinates along with a slide, OPM will extract patches from the locations defined in the csv. The overall flowchart is illustrated in \autoref{fig:flowchart}.
 
 
 # Acknowledgements
