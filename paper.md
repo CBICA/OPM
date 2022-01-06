@@ -1,5 +1,5 @@
 ---
-title: 'Open Patch Miner: parallel reading/writing of patches for digital histopathology'
+title: 'Open Patch Miner: Comprehensive parallel reading/writing of tissue patches for computational histopathology '
 tags:
   - Python
   - histopathology
@@ -43,7 +43,9 @@ The transition of histopathology from glass slides to digitized whole slide imag
 
 Despite patch extraction being requisite for applying algorithms to digital histopathology, there are very few applications which automatically generate small patches from the entire WSI, which is a critical first step during computational histopathology analysis [@gurcan2009histopathological; @tizhoosh2018artificial]. Additionally, accompanying information and relevant metadata must be saved with patches [@hou2016patch; @cui2021artificial]. This includes, but is not limited to, the coordinates of patches, the associated patient information, corresponding segmentation maps, and pixel classes represented in the patches. 
 
-Open Patch Miner (OPM) provides a high-level library capable of tissue detection, parallel patch extraction, validation, and saving of patches. It has a modular nature, allowing for users to define custom checks to determine which patches should be saved, and where patches should be extracted from. Additionally, OPM can automatically determine candidate tissue regions and will save either a predetermined number of patches, or will extract patches until no more can be called without the allowed overlap. Currently, OPM is used in the Generally Nuanced Deep Learning Framework (GaNDLF) [@pati2021gandlf] to extract patches from a WSI for training neural networks. Additionally, OPM has been used in currently published sudies with applications in histopathology normalization [@grenko2020norm], prediction of overall survival of glioblastoma patients [@hao2020prediction], and the longitudinal analysis of recurrent glioma to better understand the underlying genetics and tumor microenvironment [@varn2021longitudinal; @varn2021epco].
+Open Patch Miner (OPM) provides a high-level library capable of tissue detection, parallel patch extraction, validation, and saving of patches. It has a modular nature, allowing for users to define custom checks to determine which patches should be saved, and where patches should be extracted from. Additionally, OPM can automatically determine candidate tissue regions and will save either a predetermined number of patches, or will extract patches until no more can be called without the allowed overlap. Currently, OPM is used in the Generally Nuanced Deep Learning Framework (GaNDLF) [@pati2021gandlf] to extract patches from a WSI for training neural networks. Additionally, OPM has been used in currently published studies with applications in histopathology normalization [@grenko2020norm], prediction of overall survival of glioblastoma patients [@hao2020prediction], and the longitudinal analysis of recurrent glioma to better understand the underlying genetics and tumor microenvironment [@varn2021longitudinal; @varn2021epco].
+
+Towards this end, the Open Patch Miner offers a robust, reproducible, comprehensive solution to researchers working in the field of computational histopathology.
 
 
 # Method
