@@ -78,5 +78,7 @@ if __name__ == '__main__':
         manager.mine_patches(output_csv=args.output_csv, config=cfg)
         print("Total time: {}".format(time.time() - start))
     else:
+        if args.label_map_path is not None:
+            manager.set_label_map(args.label_map_path)
         manager.save_predefined_patches(patch_coord_csv=args.input_csv, config=cfg)
 
