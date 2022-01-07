@@ -32,7 +32,11 @@ pip install .
 To try an example:
 ```powershell
 # continue from virtual environment shell
+# Extract 10 tissue patches from images/example_slide.tiff
 python patch_miner.py -i images/example_slide.tiff -lm images/example_lm.tiff -o example -c opm/config.yml
+# Use the output manifest from last run (example/list.csv) to re-extract the same patches for a different replicate
+# This is useful if you have multiple slides/label maps and you want corresponding coordinates from each of them
+python patch_miner.py -i images/example_slide.tiff -lm images/example_lm.tiff -c opm/config.yml -o example_replicate --input_csv example/list.csv
 ```
 By default it detects tissue and extracts 1000 random patches from the included .svs file. Play with this number as well as the number of parallel threads in example.py (default patches=1000, default threads=100)
 ## Options
