@@ -10,14 +10,15 @@ from pathlib import Path
 import skimage.io
 import pandas as pd
 
+
 class PatchManager:
     def __init__(self, filename, output_dir):
         """
         Initialization for PatchManager
         @param filename: name of main WSI.
         """
+        self.set_slide_path(filename)
         self.patches = list()
-        self.img_path = filename
         self.slide_folder = Path(filename).stem
         self.valid_mask = None
         self.mined_mask = None
@@ -55,6 +56,10 @@ class PatchManager:
 
     def set_slide_path(self, filename):
         self.img_path = filename
+        self.img_path = self.convert_to_tiff(self.img_path, "img")
+        self.slide_object = open_slide(self.img_path)
+        self.slide_dims = self.slide_object.dimensions
+
 
     def set_label_map(self, path):
         """
@@ -63,10 +68,7 @@ class PatchManager:
         """
         self.label_map = self.convert_to_tiff(path, "mask")
         self.label_map_object = open_slide(self.label_map)
-        self.img_path = self.convert_to_tiff(self.img_path, "img")
-        self.slide_object = open_slide(self.img_path)
-        self.slide_dims = self.slide_object.dimensions
-        
+
         assert all(x == y for x, y in zip(self.label_map_object.dimensions, self.slide_dims)), \
             "Label map must have same dimensions as main slide."
         self.label_map_folder = Path(path).stem
@@ -374,9 +376,14 @@ class PatchManager:
                     new_row.update({self.image_header: slide_patch_path,
                                         self.mask_header: lm_patch_path,
                                         "PatchComposition": lm_result})
-                else:
-                    slide_patch_path = np_slide_futures[index, 1].get_patch_path(self.output_dir, False)
-                    new_row.update({"SlidePatchPath": slide_patch_path})
+
+                slide_patch_path = np_slide_futures[index, 1].get_patch_path(self.output_dir, False)
+                new_row.update({"SlidePatchPath": slide_patch_path})
+
+                patch_coords = np_slide_futures[index, 1].coordinates
+                new_row.update({"PatchCoordinatesX": patch_coords[1]})
+                new_row.update({"PatchCoordinatesY": patch_coords[0]})
+
                 new_df_rows.append(new_row)
 
             new_df = pd.DataFrame(new_df_rows)
@@ -388,7 +395,7 @@ class PatchManager:
 
         print("Done!")
 
-    def save_predefined_patches(self, patch_coord_csv, config):
+    def save_predefined_patches(self, patch_coord_csv, config, x_coord_col="PatchCoordinatesX", y_coord_col="PatchCoordinatesY"):
         """
 
         @param output_directory:
@@ -405,23 +412,20 @@ class PatchManager:
         output_dir_slide_folder = os.path.join(self.output_dir, self.slide_folder)
         Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
         # Todo, port to pandas or something more sophisticated?
-        with open(patch_coord_csv, "r") as input_csv:
-            for line in input_csv:
-                try:
-                    x, y = [int(val) for val in line.split(",")]
-                    
-                    _save_patch_partial = partial(_save_patch, output_directory=output_dir_slide_folder,
-                                                  save=True,
-                                                  check_if_valid=False)
+        input_df = pd.read_csv(patch_coord_csv)
+        for idx, row in input_df.iterrows():
+            x, y = row[x_coord_col], row[y_coord_col]
+            patch = Patch(self.img_path, self.slide_object, self, [y, x], 0, patch_size, "_patch_{}-{}.png")
+            self.patches.append(patch)
 
-                    patch = Patch(self.img_path, self.slide_object, self, [x, y], 0, patch_size, "_patch_{}-{}.png")
-                    self.patches.append(patch)
+            if self.label_map is not None:
+                lm_patch = self.pull_from_label_map(patch)
+                self.label_map_patches.append(lm_patch)
 
-                    if self.label_map is not None:
-                        lm_patch = self.pull_from_label_map(patch)
-                        self.label_map_patches.append(lm_patch)
-                except Exception as e:
-                    print(e)
+        _save_patch_partial = partial(_save_patch,
+                                      output_directory=output_dir_slide_folder,
+                                      save=True,
+                                      check_if_valid=False)
 
         print("Saving slide patches:")
         with concurrent.futures.ThreadPoolExecutor(n_jobs) as executor:
@@ -433,8 +437,8 @@ class PatchManager:
                 )
             )
 
-        print("Saving label maps:")
         if self.label_map is not None:
+            print("Saving label maps:")
             _lm_save_patch_partial = partial(_save_patch,
                                              output_directory=output_dir_slide_folder,
                                              save=True,
