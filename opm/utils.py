@@ -6,7 +6,7 @@ from skimage.morphology import remove_small_objects, remove_small_holes
 from skimage.color.colorconv import rgb2hsv
 import matplotlib.pyplot as plt
 import yaml
-from opm.SlideObject import open_slide
+from .SlideObject import open_slide
 
 
 # RGB Masking (pen) constants
