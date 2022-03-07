@@ -309,7 +309,7 @@ class PatchManager:
             output_dir_slide_folder = os.path.join(self.output_dir, self.slide_folder)
             Path(output_dir_slide_folder).mkdir(parents=True, exist_ok=True)
             _save_patch_partial = partial(_save_patch,
-                                        output_directory=output_dir_slide_folder,
+                                        output_directory=self.output_dir,
                                         save=save,
                                         check_if_valid=True)
             
@@ -346,7 +346,7 @@ class PatchManager:
                 Path(output_dir_mask_folder).mkdir(parents=True, exist_ok=True)
                 
                 _lm_save_patch_partial = partial(_save_patch,
-                                                 output_directory=output_dir_mask_folder,
+                                                 output_directory=self.output_dir,
                                                  save=save,
                                                  check_if_valid=False,
                                                  patch_processor=get_patch_class_proportions,
