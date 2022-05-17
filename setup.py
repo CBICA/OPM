@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 with open('README.md') as readme_file:
-  readme = readme_file.read()
+    readme = readme_file.read()
 
 requirements = [
     'scikit-image',
@@ -21,7 +21,7 @@ requirements = [
 
 setup(
     name='OpenPatchMiner',
-    version='0.1.6',
+    version='0.1.7',
     python_requires='>=3.6',
     packages=find_packages(),
     install_requires=requirements,
