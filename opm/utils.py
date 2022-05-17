@@ -285,38 +285,42 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
             raise ValueError(
                 "Could not parse patch size from config.yml, use either ',', 'x', 'X', or '*' as separator between x and y dimensions."
             )
+    elif not isinstance(patch_size_from_config, list):
+        raise ValueError("Patch size must be a list or string.")
 
-        if "m" in patch_size_from_config[0] or "m" in patch_size_from_config[1]:
-            if verbose:
-                print("Using mpp to calculate patch size")
-            # only enter if "m" is present in patch size
-            input_slide = tiffslide.open_slide(input_slide_path)
-            metadata = input_slide.properties
-            magnification_x = metadata.get("tiffslide.mpp-x", -1)
-            magnification_y = metadata.get("tiffslide.mpp-y", -1)
-            # get patch size in pixels
-            x_microns = eval(patch_size_from_config[0].replace("m", ""))
-            y_microns = eval(patch_size_from_config[1].replace("m", ""))
-            if verbose:
-                print(
-                    "Original patch size in microns: [{},{}]".format(
-                        x_microns, y_microns
+    for i in range(len(patch_size)):
+        if patch_size[i].isnumeric():
+            return_patch_size[i] = int(patch_size[i])
+        elif isinstance(patch_size[i], str):
+            if "m" in patch_size[i]:
+                if verbose:
+                    print(
+                        "Using mpp to calculate patch size for dimension {}".format(i)
                     )
-                )
-            if magnification_x > 0:
-                return_patch_size[0] = x_microns / magnification_x
-            if magnification_y > 0:
-                return_patch_size[1] = y_microns / magnification_y
-            if verbose:
-                print(
-                    "Estimated patch size in pixels: [{},{}]".format(
-                        patch_size_from_config[0], patch_size_from_config[1]
+                # only enter if "m" is present in patch size
+                input_slide = tiffslide.open_slide(input_slide_path)
+                metadata = input_slide.properties
+                if i == 0:
+                    magnification = metadata.get("tiffslide.mpp-x", -1)
+                elif i == 1:
+                    magnification = metadata.get("tiffslide.mpp-y", -1)
+                # get patch size in pixels
+                size_in_microns = float(patch_size[i].replace("m", ""))
+                if verbose:
+                    print(
+                        "Original patch size in microns for dimension {}",
+                        format(size_in_microns),
                     )
-                )
-        else:
-            return_patch_size[0] = eval(patch_size_from_config[0])
-            return_patch_size[1] = eval(patch_size_from_config[1])
-    else:
-        return_patch_size = patch_size_from_config
+                if magnification > 0:
+                    return_patch_size[i] = size_in_microns / magnification
+            else:
+                return_patch_size[i] = float(patch_size_from_config[i])
+
+    if verbose:
+        print(
+            "Estimated patch size in pixels: [{},{}]".format(
+                patch_size_from_config[0], patch_size_from_config[1]
+            )
+        )
 
     return return_patch_size
