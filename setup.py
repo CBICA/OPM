@@ -15,7 +15,8 @@ requirements = [
     'pyyaml',
     'zarr',
     'tifffile',
-    'imagecodecs'
+    'tiffslide',
+    'imagecodecs',
 ]
 
 setup(
