@@ -98,8 +98,10 @@ if __name__ == '__main__':
             x_microns = eval(cfg['patch_size'][0].replace("m", ""))
             y_microns = eval(cfg['patch_size'][1].replace("m", ""))
             print("Original patch size in microns: [{},{}]".format(x_microns, y_microns)) # printing for verbosity
-            cfg['patch_size'][0] = x_microns / magnification_x
-            cfg['patch_size'][1] = y_microns / magnification_y
+            if magnification_x > 0:
+                cfg['patch_size'][0] = x_microns / magnification_x
+            if magnification_y > 0:
+                cfg['patch_size'][1] = y_microns / magnification_y
             print("Estimated patch size in pixels: [{},{}]".format(cfg['patch_size'][0], cfg['patch_size'][1])) # printing for verbosity
         else:
             cfg['patch_size'][0] = eval(cfg['patch_size'][0])
