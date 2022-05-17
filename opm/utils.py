@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import yaml
 from .SlideObject import open_slide
 
+import tiffslide
 
 # RGB Masking (pen) constants
 RGB_RED_CHANNEL = 0
@@ -233,3 +234,59 @@ def generate_initial_mask(slide_path, scale):
     real_scale = (slide_dims[0] / slide_thumbnail.shape[1], slide_dims[1] / slide_thumbnail.shape[0])
 
     return tissue_mask(slide_thumbnail), real_scale
+
+
+def get_patch_size_in_microns(input_slide_path, patch_size_from_config):
+    """
+    This function takes a slide path and a patch size in microns and returns the patch size in pixels.
+
+    Args:
+        input_slide_path (str): The input WSI path.
+        patch_size_from_config (str): The patch size in microns.
+
+    Raises:
+        ValueError: If the patch size is not a valid number in microns.
+
+    Returns:
+        list: The patch size in pixels.
+    """
+
+    return_patch_size = [0,0]
+
+    if isinstance(patch_size_from_config, str):
+        # first remove all spaces and square brackets
+        patch_size_from_config = patch_size_from_config.replace(' ', '')
+        patch_size_from_config = patch_size_from_config.replace('[', '')
+        patch_size_from_config = patch_size_from_config.replace(']', '')
+        # try different split strategies
+        patch_size = patch_size_from_config.split(',')
+        if len(patch_size) == 1:
+            patch_size = patch_size_from_config.split('x')
+        if len(patch_size) == 1:
+            patch_size = patch_size_from_config.split('X')
+        if len(patch_size) == 1:
+            patch_size = patch_size_from_config.split('*')
+        if len(patch_size) == 1:
+            raise ValueError("Could not parse patch size from config.yml, use either ',', 'x', 'X', or '*' as separator between x and y dimensions.")
+    
+    if "m" in patch_size_from_config[0] or "m" in patch_size_from_config[1]:
+        print("Using mpp to calculate patch size") # printing for verbosity
+        # only enter if "m" is present in patch size
+        input_slide = tiffslide.open_slide(input_slide_path)
+        metadata = input_slide.properties
+        magnification_x = metadata.get("tiffslide.mpp-x", -1)
+        magnification_y = metadata.get("tiffslide.mpp-y", -1)
+        # get patch size in pixels
+        x_microns = eval(patch_size_from_config[0].replace("m", ""))
+        y_microns = eval(patch_size_from_config[1].replace("m", ""))
+        print("Original patch size in microns: [{},{}]".format(x_microns, y_microns)) # printing for verbosity
+        if magnification_x > 0:
+            return_patch_size[0] = x_microns / magnification_x
+        if magnification_y > 0:
+            return_patch_size[1] = y_microns / magnification_y
+        print("Estimated patch size in pixels: [{},{}]".format(patch_size_from_config[0], patch_size_from_config[1])) # printing for verbosity
+    else:
+        return_patch_size[0] = eval(patch_size_from_config[0])
+        return_patch_size[1] = eval(patch_size_from_config[1])
+    
+    return return_patch_size

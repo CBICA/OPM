@@ -10,7 +10,7 @@ from PIL import Image
 from pathlib import Path
 from functools import partial
 from opm.patch_manager import PatchManager
-from opm.utils import alpha_channel_check, patch_size_check, parse_config, generate_initial_mask
+from opm.utils import alpha_channel_check, patch_size_check, parse_config, generate_initial_mask, get_patch_size_in_microns
 
 Image.MAX_IMAGE_PIXELS = None
 warnings.simplefilter("ignore")
@@ -71,42 +71,7 @@ if __name__ == '__main__':
             manager.set_label_map(args.label_map_path)
         
         ## trying to handle mpp
-        if isinstance(cfg['patch_size'], str):
-            # first remove all spaces and square brackets
-            cfg['patch_size'] = cfg['patch_size'].replace(' ', '')
-            cfg['patch_size'] = cfg['patch_size'].replace('[', '')
-            cfg['patch_size'] = cfg['patch_size'].replace(']', '')
-            # try different split strategies
-            patch_size = cfg['patch_size'].split(',')
-            if len(patch_size) == 1:
-                patch_size = cfg['patch_size'].split('x')
-            if len(patch_size) == 1:
-                patch_size = cfg['patch_size'].split('X')
-            if len(patch_size) == 1:
-                patch_size = cfg['patch_size'].split('*')
-            if len(patch_size) == 1:
-                raise ValueError("Could not parse patch size from config.yml, use either ',', 'x', 'X', or '*' as separator between x and y dimensions.")
-        
-        if "m" in cfg['patch_size'][0] or "m" in cfg['patch_size'][1]:
-            print("Using mpp to calculate patch size") # printing for verbosity
-            # only enter if "m" is present in patch size
-            input_slide = tiffslide.open_slide(args.input_path)
-            metadata = input_slide.properties
-            magnification_x = metadata.get("tiffslide.mpp-x", -1)
-            magnification_y = metadata.get("tiffslide.mpp-y", -1)
-            # get patch size in pixels
-            x_microns = eval(cfg['patch_size'][0].replace("m", ""))
-            y_microns = eval(cfg['patch_size'][1].replace("m", ""))
-            print("Original patch size in microns: [{},{}]".format(x_microns, y_microns)) # printing for verbosity
-            if magnification_x > 0:
-                cfg['patch_size'][0] = x_microns / magnification_x
-            if magnification_y > 0:
-                cfg['patch_size'][1] = y_microns / magnification_y
-            print("Estimated patch size in pixels: [{},{}]".format(cfg['patch_size'][0], cfg['patch_size'][1])) # printing for verbosity
-        else:
-            cfg['patch_size'][0] = eval(cfg['patch_size'][0])
-            cfg['patch_size'][1] = eval(cfg['patch_size'][1])
-        ## trying to handle mpp
+        cfg['patch_size'] = get_patch_size_in_microns(args.input_path, cfg['patch_size'])
 
         # Reject patch if any pixels are transparent
         manager.add_patch_criteria(alpha_channel_check)
