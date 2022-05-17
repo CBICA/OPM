@@ -41,6 +41,7 @@ def print_sorted_dict(dictionary):
 
     return output_str
 
+
 def pass_method(*args):
     """
     Method which takes any number of arguments and returns and empty string. Like 'pass' reserved word, but as a func.
@@ -69,8 +70,8 @@ def get_patch_class_proportions(image):
     """
     np_img = np.asarray(image)
     unique, counts = np.unique(image, return_counts=True)
-    denom = (np_img.shape[0] * np_img.shape[1])
-    prop_dict = {val: count/denom for val, count in list(zip(unique, counts))}
+    denom = np_img.shape[0] * np_img.shape[1]
+    prop_dict = {val: count / denom for val, count in list(zip(unique, counts))}
     return print_sorted_dict(prop_dict)
 
 
@@ -119,16 +120,22 @@ def tissue_mask(image):
 def basic_pen_mask(image, pen_size_threshold, pen_mask_expansion):
     green_mask = np.bitwise_and(
         image[:, :, RGB_GREEN_CHANNEL] > image[:, :, RGB_GREEN_CHANNEL],
-        image[:, :, RGB_GREEN_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL] > MIN_COLOR_DIFFERENCE)
+        image[:, :, RGB_GREEN_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL]
+        > MIN_COLOR_DIFFERENCE,
+    )
 
     blue_mask = np.bitwise_and(
         image[:, :, RGB_BLUE_CHANNEL] > image[:, :, RGB_GREEN_CHANNEL],
-        image[:, :, RGB_BLUE_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL] > MIN_COLOR_DIFFERENCE)
+        image[:, :, RGB_BLUE_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL]
+        > MIN_COLOR_DIFFERENCE,
+    )
 
     masked_pen = np.bitwise_or(green_mask, blue_mask)
     new_mask_image = remove_small_objects(masked_pen, pen_size_threshold)
 
-    return maximum(np.where(new_mask_image, 1, 0), disk(pen_mask_expansion)).astype(bool)
+    return maximum(np.where(new_mask_image, 1, 0), disk(pen_mask_expansion)).astype(
+        bool
+    )
 
 
 def basic_hsv_mask(image):
@@ -138,8 +145,10 @@ def basic_hsv_mask(image):
     :return: image mask, True pixels are gray-black.
     """
     hsv_image = rgb2hsv(image)
-    return np.bitwise_or(hsv_image[:, :, HSV_SAT_CHANNEL] <= MIN_SAT,
-                         hsv_image[:, :, HSV_VAL_CHANNEL] <= MIN_VAL)
+    return np.bitwise_or(
+        hsv_image[:, :, HSV_SAT_CHANNEL] <= MIN_SAT,
+        hsv_image[:, :, HSV_VAL_CHANNEL] <= MIN_VAL,
+    )
 
 
 def hybrid_mask(image):
@@ -200,21 +209,21 @@ def parse_config(config_file):
     config = yaml.load(open(config_file), Loader=yaml.FullLoader)
 
     # initialize defaults
-    if not('scale' in config):
-        config['scale'] = 16
-    if not('num_patches' in config):
-        config['num_patches'] = -1
-    if not('num_workers' in config):
-        config['num_workers'] = 1
-    if not('save_patches' in config):
-        config['save_patches'] = True
-    if not('value_map' in config):
-        config['value_map'] = None
-    if not('read_type' in config):
-        config['read_type'] = "random"
-    if not('overlap_factor' in config):
-        config['overlap_factor'] = 0.0
-    
+    if not ("scale" in config):
+        config["scale"] = 16
+    if not ("num_patches" in config):
+        config["num_patches"] = -1
+    if not ("num_workers" in config):
+        config["num_workers"] = 1
+    if not ("save_patches" in config):
+        config["save_patches"] = True
+    if not ("value_map" in config):
+        config["value_map"] = None
+    if not ("read_type" in config):
+        config["read_type"] = "random"
+    if not ("overlap_factor" in config):
+        config["overlap_factor"] = 0.0
+
     return config
 
 
@@ -230,19 +239,25 @@ def generate_initial_mask(slide_path, scale):
     slide_dims = slide.dimensions
 
     # Call thumbnail for effiency, calculate scale relative to whole slide
-    slide_thumbnail = np.asarray(slide.get_thumbnail((slide_dims[0] // scale, slide_dims[1] // scale)))
-    real_scale = (slide_dims[0] / slide_thumbnail.shape[1], slide_dims[1] / slide_thumbnail.shape[0])
+    slide_thumbnail = np.asarray(
+        slide.get_thumbnail((slide_dims[0] // scale, slide_dims[1] // scale))
+    )
+    real_scale = (
+        slide_dims[0] / slide_thumbnail.shape[1],
+        slide_dims[1] / slide_thumbnail.shape[0],
+    )
 
     return tissue_mask(slide_thumbnail), real_scale
 
 
-def get_patch_size_in_microns(input_slide_path, patch_size_from_config):
+def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=False):
     """
     This function takes a slide path and a patch size in microns and returns the patch size in pixels.
 
     Args:
         input_slide_path (str): The input WSI path.
         patch_size_from_config (str): The patch size in microns.
+        verbose (bool): Whether to provide verbose prints.
 
     Raises:
         ValueError: If the patch size is not a valid number in microns.
@@ -251,42 +266,57 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config):
         list: The patch size in pixels.
     """
 
-    return_patch_size = [0,0]
+    return_patch_size = [0, 0]
 
     if isinstance(patch_size_from_config, str):
         # first remove all spaces and square brackets
-        patch_size_from_config = patch_size_from_config.replace(' ', '')
-        patch_size_from_config = patch_size_from_config.replace('[', '')
-        patch_size_from_config = patch_size_from_config.replace(']', '')
+        patch_size_from_config = patch_size_from_config.replace(" ", "")
+        patch_size_from_config = patch_size_from_config.replace("[", "")
+        patch_size_from_config = patch_size_from_config.replace("]", "")
         # try different split strategies
-        patch_size = patch_size_from_config.split(',')
+        patch_size = patch_size_from_config.split(",")
         if len(patch_size) == 1:
-            patch_size = patch_size_from_config.split('x')
+            patch_size = patch_size_from_config.split("x")
         if len(patch_size) == 1:
-            patch_size = patch_size_from_config.split('X')
+            patch_size = patch_size_from_config.split("X")
         if len(patch_size) == 1:
-            patch_size = patch_size_from_config.split('*')
+            patch_size = patch_size_from_config.split("*")
         if len(patch_size) == 1:
-            raise ValueError("Could not parse patch size from config.yml, use either ',', 'x', 'X', or '*' as separator between x and y dimensions.")
-    
-    if "m" in patch_size_from_config[0] or "m" in patch_size_from_config[1]:
-        print("Using mpp to calculate patch size") # printing for verbosity
-        # only enter if "m" is present in patch size
-        input_slide = tiffslide.open_slide(input_slide_path)
-        metadata = input_slide.properties
-        magnification_x = metadata.get("tiffslide.mpp-x", -1)
-        magnification_y = metadata.get("tiffslide.mpp-y", -1)
-        # get patch size in pixels
-        x_microns = eval(patch_size_from_config[0].replace("m", ""))
-        y_microns = eval(patch_size_from_config[1].replace("m", ""))
-        print("Original patch size in microns: [{},{}]".format(x_microns, y_microns)) # printing for verbosity
-        if magnification_x > 0:
-            return_patch_size[0] = x_microns / magnification_x
-        if magnification_y > 0:
-            return_patch_size[1] = y_microns / magnification_y
-        print("Estimated patch size in pixels: [{},{}]".format(patch_size_from_config[0], patch_size_from_config[1])) # printing for verbosity
+            raise ValueError(
+                "Could not parse patch size from config.yml, use either ',', 'x', 'X', or '*' as separator between x and y dimensions."
+            )
+
+        if "m" in patch_size_from_config[0] or "m" in patch_size_from_config[1]:
+            if verbose:
+                print("Using mpp to calculate patch size")
+            # only enter if "m" is present in patch size
+            input_slide = tiffslide.open_slide(input_slide_path)
+            metadata = input_slide.properties
+            magnification_x = metadata.get("tiffslide.mpp-x", -1)
+            magnification_y = metadata.get("tiffslide.mpp-y", -1)
+            # get patch size in pixels
+            x_microns = eval(patch_size_from_config[0].replace("m", ""))
+            y_microns = eval(patch_size_from_config[1].replace("m", ""))
+            if verbose:
+                print(
+                    "Original patch size in microns: [{},{}]".format(
+                        x_microns, y_microns
+                    )
+                )
+            if magnification_x > 0:
+                return_patch_size[0] = x_microns / magnification_x
+            if magnification_y > 0:
+                return_patch_size[1] = y_microns / magnification_y
+            if verbose:
+                print(
+                    "Estimated patch size in pixels: [{},{}]".format(
+                        patch_size_from_config[0], patch_size_from_config[1]
+                    )
+                )
+        else:
+            return_patch_size[0] = eval(patch_size_from_config[0])
+            return_patch_size[1] = eval(patch_size_from_config[1])
     else:
-        return_patch_size[0] = eval(patch_size_from_config[0])
-        return_patch_size[1] = eval(patch_size_from_config[1])
-    
+        return_patch_size = patch_size_from_config
+
     return return_patch_size
