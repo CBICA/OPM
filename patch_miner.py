@@ -72,8 +72,10 @@ if __name__ == '__main__':
         
         ## trying to handle mpp
         if isinstance(cfg['patch_size'], str):
-            # first remove all spaces
+            # first remove all spaces and square brackets
             cfg['patch_size'] = cfg['patch_size'].replace(' ', '')
+            cfg['patch_size'] = cfg['patch_size'].replace('[', '')
+            cfg['patch_size'] = cfg['patch_size'].replace(']', '')
             # try different split strategies
             patch_size = cfg['patch_size'].split(',')
             if len(patch_size) == 1:
