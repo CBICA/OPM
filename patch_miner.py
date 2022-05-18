@@ -5,11 +5,12 @@ import warnings
 import yaml
 import os
 
+import tiffslide
 from PIL import Image
 from pathlib import Path
 from functools import partial
 from opm.patch_manager import PatchManager
-from opm.utils import alpha_channel_check, patch_size_check, parse_config, generate_initial_mask
+from opm.utils import alpha_channel_check, patch_size_check, parse_config, generate_initial_mask, get_patch_size_in_microns
 
 Image.MAX_IMAGE_PIXELS = None
 warnings.simplefilter("ignore")
@@ -64,10 +65,13 @@ if __name__ == '__main__':
 
     if args.input_csv is None:
         # Generate an initial validity mask
-        mask, scale = generate_initial_mask(args.input_path, cfg['scale'])
+        mask, scale = generate_initial_mask(slide_path, cfg['scale'])
         manager.set_valid_mask(mask, scale)
         if args.label_map_path is not None:
             manager.set_label_map(args.label_map_path)
+        
+        ## trying to handle mpp
+        cfg['patch_size'] = get_patch_size_in_microns(slide_path, cfg['patch_size'], True)
 
         # Reject patch if any pixels are transparent
         manager.add_patch_criteria(alpha_channel_check)
