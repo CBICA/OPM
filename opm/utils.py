@@ -291,6 +291,7 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
     else:
         raise ValueError("Patch size must be a list or string.")
 
+    magnification_prev = -1
     for i in range(len(patch_size)):
         if str(patch_size[i]).isnumeric():
             return_patch_size[i] = int(patch_size[i])
@@ -304,9 +305,22 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                 input_slide = tiffslide.open_slide(input_slide_path)
                 metadata = input_slide.properties
                 if i == 0:
-                    magnification = metadata.get("tiffslide.mpp-x", -1)
+                    magnification = metadata.get(tiffslide.PROPERTY_NAME_MPP_X, -1)
+                    # use fallback fields from metadata
+                    if magnification == -1:
+                        magnification = metadata.get("XResolution", -1)
+                    if magnification == -1:
+                        magnification = metadata.get("tiff.XResolution", -1)
                 elif i == 1:
-                    magnification = metadata.get("tiffslide.mpp-y", -1)
+                    magnification = metadata.get(tiffslide.PROPERTY_NAME_MPP_Y, -1)
+                    # use fallback fields from metadata
+                    if magnification == -1:
+                        magnification = metadata.get("YResolution", -1)
+                    if magnification == -1:
+                        magnification = metadata.get("tiff.YResolution", -1)
+                    if magnification == -1:
+                        # if y-axis data is missing, use x-axis data
+                        magnification = magnification_prev
                 # get patch size in pixels
                 # check for 'mu' first
                 size_in_microns = patch_size[i].replace("mu", "")
@@ -318,6 +332,7 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                     )
                 if magnification > 0:
                     return_patch_size[i] = round(size_in_microns / magnification)
+                    magnification_prev = magnification
             else:
                 return_patch_size[i] = float(patch_size[i])
 
