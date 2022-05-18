@@ -308,7 +308,8 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                 elif i == 1:
                     magnification = metadata.get("tiffslide.mpp-y", -1)
                 # get patch size in pixels
-                size_in_microns = float(patch_size[i].replace("mu", ""))
+                # check for 'mu' first
+                size_in_microns = patch_size[i].replace("mu", "")
                 size_in_microns = float(size_in_microns.replace("m", ""))
                 if verbose:
                     print(
