@@ -267,6 +267,7 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
     """
 
     return_patch_size = [0, 0]
+    patch_size = None
 
     if isinstance(patch_size_from_config, str):
         # first remove all spaces and square brackets
@@ -285,14 +286,16 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
             raise ValueError(
                 "Could not parse patch size from config.yml, use either ',', 'x', 'X', or '*' as separator between x and y dimensions."
             )
-    elif not isinstance(patch_size_from_config, list):
+    elif isinstance(patch_size_from_config, list):
+        patch_size = patch_size_from_config
+    else:
         raise ValueError("Patch size must be a list or string.")
 
-    for i in range(len(patch_size_from_config)):
-        if str(patch_size_from_config[i]).isnumeric():
-            return_patch_size[i] = int(patch_size_from_config[i])
-        elif isinstance(patch_size_from_config[i], str):
-            if "m" in patch_size_from_config[i]:
+    for i in range(len(patch_size)):
+        if str(patch_size[i]).isnumeric():
+            return_patch_size[i] = int(patch_size[i])
+        elif isinstance(patch_size[i], str):
+            if ("m" in patch_size[i]) or ("mu" in patch_size[i]):
                 if verbose:
                     print(
                         "Using mpp to calculate patch size for dimension {}".format(i)
@@ -305,21 +308,22 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                 elif i == 1:
                     magnification = metadata.get("tiffslide.mpp-y", -1)
                 # get patch size in pixels
-                size_in_microns = float(patch_size_from_config[i].replace("m", ""))
+                size_in_microns = float(patch_size[i].replace("mu", ""))
+                size_in_microns = float(size_in_microns.replace("m", ""))
                 if verbose:
                     print(
                         "Original patch size in microns for dimension {}",
                         format(size_in_microns),
                     )
                 if magnification > 0:
-                    return_patch_size[i] = size_in_microns / magnification
+                    return_patch_size[i] = round(size_in_microns / magnification)
             else:
-                return_patch_size[i] = float(patch_size_from_config[i])
+                return_patch_size[i] = float(patch_size[i])
 
     if verbose:
         print(
             "Estimated patch size in pixels: [{},{}]".format(
-                patch_size_from_config[0], patch_size_from_config[1]
+                patch_size[0], patch_size[1]
             )
         )
 
