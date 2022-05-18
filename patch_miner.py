@@ -65,13 +65,13 @@ if __name__ == '__main__':
 
     if args.input_csv is None:
         # Generate an initial validity mask
-        mask, scale = generate_initial_mask(args.input_path, cfg['scale'])
+        mask, scale = generate_initial_mask(slide_path, cfg['scale'])
         manager.set_valid_mask(mask, scale)
         if args.label_map_path is not None:
             manager.set_label_map(args.label_map_path)
         
         ## trying to handle mpp
-        cfg['patch_size'] = get_patch_size_in_microns(args.input_path, cfg['patch_size'], True)
+        cfg['patch_size'] = get_patch_size_in_microns(slide_path, cfg['patch_size'], True)
 
         # Reject patch if any pixels are transparent
         manager.add_patch_criteria(alpha_channel_check)
