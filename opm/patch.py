@@ -34,7 +34,7 @@ class Patch:
         Read patch from self.slide_object given this patch's coordinates, level, and size.
         @return: PIL object of RGBA patch image.
         """
-        return self.slide_object.read_region((self.coordinates[1], self.coordinates[0]), self.level, self.size)
+        return np.asarray(self.slide_object.read_region((self.coordinates[1], self.coordinates[0]), self.level, self.size))
 
     def copy(self):
         """
