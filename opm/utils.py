@@ -339,7 +339,7 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
     if verbose:
         print(
             "Estimated patch size in pixels: [{},{}]".format(
-                patch_size[0], patch_size[1]
+                return_patch_size[0], return_patch_size[1]
             )
         )
 
