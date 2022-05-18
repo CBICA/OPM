@@ -288,7 +288,7 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
     elif not isinstance(patch_size_from_config, list):
         raise ValueError("Patch size must be a list or string.")
 
-    for i in range(len(patch_size)):
+    for i in range(len(patch_size_from_config)):
         if patch_size[i].isnumeric():
             return_patch_size[i] = int(patch_size[i])
         elif isinstance(patch_size[i], str):
