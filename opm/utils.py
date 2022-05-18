@@ -289,10 +289,10 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
         raise ValueError("Patch size must be a list or string.")
 
     for i in range(len(patch_size_from_config)):
-        if patch_size[i].isnumeric():
-            return_patch_size[i] = int(patch_size[i])
-        elif isinstance(patch_size[i], str):
-            if "m" in patch_size[i]:
+        if patch_size_from_config[i].isnumeric():
+            return_patch_size[i] = int(patch_size_from_config[i])
+        elif isinstance(patch_size_from_config[i], str):
+            if "m" in patch_size_from_config[i]:
                 if verbose:
                     print(
                         "Using mpp to calculate patch size for dimension {}".format(i)
@@ -305,7 +305,7 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                 elif i == 1:
                     magnification = metadata.get("tiffslide.mpp-y", -1)
                 # get patch size in pixels
-                size_in_microns = float(patch_size[i].replace("m", ""))
+                size_in_microns = float(patch_size_from_config[i].replace("m", ""))
                 if verbose:
                     print(
                         "Original patch size in microns for dimension {}",
