@@ -286,7 +286,7 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
             raise ValueError(
                 "Could not parse patch size from config.yml, use either ',', 'x', 'X', or '*' as separator between x and y dimensions."
             )
-    elif isinstance(patch_size_from_config, list):
+    elif isinstance(patch_size_from_config, list) or isinstance(patch_size_from_config, tuple):
         patch_size = patch_size_from_config
     else:
         raise ValueError("Patch size must be a list or string.")
