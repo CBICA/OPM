@@ -33,7 +33,7 @@ class Patch:
         Read patch from self.slide_object given this patch's coordinates, level, and size.
         @return: PIL object of RGBA patch image.
         """
-        return self.slide_object.read_region((self.coordinates[1], self.coordinates[0]), self.level, self.size)
+        return np.asarray(self.slide_object.read_region((self.coordinates[1], self.coordinates[0]), self.level, self.size))
 
     def copy(self):
         """
@@ -98,7 +98,7 @@ class Patch:
         try:
             if save:
                 if isinstance(value_map, dict):
-                    patch = np.asarray(self.read_patch())[:, :, 0]
+                    patch = self.read_patch()[:, :, 0]
                     patch = map_values(patch, value_map)
                     imsave(
                         fname=self.get_patch_path(out_dir),
