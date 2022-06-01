@@ -3,12 +3,12 @@ import os
 from functools import partial
 from .patch import Patch
 from .utils import get_patch_class_proportions
-from .SlideObject import open_slide
 import numpy as np
 from tqdm import tqdm
 from pathlib import Path
 import skimage.io
 import pandas as pd
+import tiffslide
 
 
 class PatchManager:
@@ -57,7 +57,7 @@ class PatchManager:
     def set_slide_path(self, filename):
         self.img_path = filename
         self.img_path = self.convert_to_tiff(self.img_path, "img")
-        self.slide_object = open_slide(self.img_path)
+        self.slide_object = tiffslide.open_slide(self.img_path)
         self.slide_dims = self.slide_object.dimensions
 
 
@@ -67,7 +67,7 @@ class PatchManager:
         @param path: path to label map.
         """
         self.label_map = self.convert_to_tiff(path, "mask")
-        self.label_map_object = open_slide(self.label_map)
+        self.label_map_object = tiffslide.open_slide(self.label_map)
 
         assert all(x == y for x, y in zip(self.label_map_object.dimensions, self.slide_dims)), \
             "Label map must have same dimensions as main slide."

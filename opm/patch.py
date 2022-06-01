@@ -1,6 +1,5 @@
 from pathlib import Path
 from .utils import pass_method, map_values
-from .SlideObject import open_slide
 import numpy as np
 from skimage.io import imsave
 import os
