@@ -1,3 +1,4 @@
+import sys
 import concurrent.futures
 import os
 from functools import partial
@@ -9,6 +10,7 @@ from tqdm import tqdm
 from pathlib import Path
 import skimage.io
 import pandas as pd
+import tiffslide
 
 
 class PatchManager:
@@ -57,7 +59,7 @@ class PatchManager:
     def set_slide_path(self, filename):
         self.img_path = filename
         self.img_path = self.convert_to_tiff(self.img_path, "img")
-        self.slide_object = open_slide(self.img_path)
+        self.slide_object = tiffslide.open_slide(self.img_path)
         self.slide_dims = self.slide_object.dimensions
 
 
@@ -67,7 +69,7 @@ class PatchManager:
         @param path: path to label map.
         """
         self.label_map = self.convert_to_tiff(path, "mask")
-        self.label_map_object = open_slide(self.label_map)
+        self.label_map_object = tiffslide.open_slide(self.label_map)
 
         assert all(x == y for x, y in zip(self.label_map_object.dimensions, self.slide_dims)), \
             "Label map must have same dimensions as main slide."
@@ -78,6 +80,10 @@ class PatchManager:
         self.mined_mask = np.zeros_like(mask)
         self.valid_mask_scale = scale
 
+        if sys.getsizeof(self.valid_mask) > 16*(1024**2):
+            print("Warning: large mask detected. Consider editing the config to use a larger scale for faster mining")
+            print("Valid mask size (in Mb): {}".format(sys.getsizeof(self.valid_mask) / (1024**2)))
+    
     def add_patch(self, patch, overlap_factor, patch_size):
         """
         Add patch to manager and take care of self.mined_mask update so it doesn't pull the same patch twice.

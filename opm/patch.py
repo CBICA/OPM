@@ -1,6 +1,5 @@
 from pathlib import Path
 from .utils import pass_method, map_values
-from tiffslide import open_slide
 import numpy as np
 from skimage.io import imsave
 import os
@@ -99,7 +98,7 @@ class Patch:
         try:
             if save:
                 if isinstance(value_map, dict):
-                    patch = np.asarray(self.read_patch())[:, :, 0]
+                    patch = self.read_patch()[:, :, 0]
                     patch = map_values(patch, value_map)
                     imsave(
                         fname=self.get_patch_path(out_dir),
