@@ -233,7 +233,7 @@ def generate_initial_mask(slide_path, scale):
     :return: list of n (x,y) coordinates
     """
     # Open slide and get properties
-    slide = open_slide(slide_path)
+    slide = tiffslide.open_slide(slide_path)
     slide_dims = slide.dimensions
 
     # Call thumbnail for effiency, calculate scale relative to whole slide
