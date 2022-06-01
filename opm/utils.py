@@ -6,8 +6,6 @@ from skimage.morphology import remove_small_objects, remove_small_holes
 from skimage.color.colorconv import rgb2hsv
 import matplotlib.pyplot as plt
 import yaml
-from tiffslide import open_slide
-
 import tiffslide
 
 # RGB Masking (pen) constants
@@ -235,7 +233,7 @@ def generate_initial_mask(slide_path, scale):
     :return: list of n (x,y) coordinates
     """
     # Open slide and get properties
-    slide = open_slide(slide_path)
+    slide = tiffslide.open_slide(slide_path)
     slide_dims = slide.dimensions
 
     # Call thumbnail for effiency, calculate scale relative to whole slide
