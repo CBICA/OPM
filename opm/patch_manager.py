@@ -3,7 +3,7 @@ import os
 from functools import partial
 from .patch import Patch
 from .utils import get_patch_class_proportions
-from .SlideObject import open_slide
+from tiffslide import open_slide
 import numpy as np
 from tqdm import tqdm
 from pathlib import Path
