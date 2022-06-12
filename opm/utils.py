@@ -328,13 +328,9 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, selected
                         format(size_in_microns),
                     )
                 if magnification > 0:
-                    return_patch_size[i] = round(size_in_microns / magnification)
-                    # at this point, return_patch_size has been calculated for level=0, and needs to be scaled for other levels
-                    if selected_level > 0:
-                        for _ in range(selected_level):
-                            return_patch_size[i] = round(return_patch_size[i] / 2)
+                    return_patch_size[i] = round(size_in_microns / (magnification * (2**selected_level)))
                     if return_patch_size[i] < 1:
-                        raise ValueError("Patch size is too small for selected level")
+                        raise ValueError("Patch size in microns is too small for selected level")
                     magnification_prev = magnification
             else:
                 return_patch_size[i] = float(patch_size[i])
