@@ -291,14 +291,12 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, selected
         raise ValueError("Patch size must be a list or string.")
 
     magnification_prev = -1
-    patch_size_in_microns = False
     for i in range(len(patch_size)):
         magnification = -1
         if str(patch_size[i]).isnumeric():
             return_patch_size[i] = int(patch_size[i])
         elif isinstance(patch_size[i], str):
             if ("m" in patch_size[i]) or ("mu" in patch_size[i]):
-                patch_size_in_microns = True
                 if verbose:
                     print(
                         "Using mpp to calculate patch size for dimension {}".format(i)
