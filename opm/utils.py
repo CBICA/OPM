@@ -248,13 +248,14 @@ def generate_initial_mask(slide_path, scale):
     return tissue_mask(slide_thumbnail), real_scale
 
 
-def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=False):
+def get_patch_size_in_microns(input_slide_path, patch_size_from_config, selected_level=0, verbose=False):
     """
     This function takes a slide path and a patch size in microns and returns the patch size in pixels.
 
     Args:
         input_slide_path (str): The input WSI path.
         patch_size_from_config (str): The patch size in microns.
+        selected_level (int): The level of the WSI to use.
         verbose (bool): Whether to provide verbose prints.
 
     Raises:
@@ -290,12 +291,14 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
         raise ValueError("Patch size must be a list or string.")
 
     magnification_prev = -1
+    patch_size_in_microns = False
     for i in range(len(patch_size)):
         magnification = -1
         if str(patch_size[i]).isnumeric():
             return_patch_size[i] = int(patch_size[i])
         elif isinstance(patch_size[i], str):
             if ("m" in patch_size[i]) or ("mu" in patch_size[i]):
+                patch_size_in_microns = True
                 if verbose:
                     print(
                         "Using mpp to calculate patch size for dimension {}".format(i)
@@ -328,6 +331,12 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                     )
                 if magnification > 0:
                     return_patch_size[i] = round(size_in_microns / magnification)
+                    # at this point, return_patch_size has been calculated for level=0, and needs to be scaled for other levels
+                    if selected_level > 0:
+                        for _ in range(selected_level):
+                            return_patch_size[i] = round(return_patch_size[i] / 2)
+                    if return_patch_size[i] < 1:
+                        raise ValueError("Patch size is too small for selected level")
                     magnification_prev = magnification
             else:
                 return_patch_size[i] = float(patch_size[i])
