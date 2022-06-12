@@ -248,13 +248,14 @@ def generate_initial_mask(slide_path, scale):
     return tissue_mask(slide_thumbnail), real_scale
 
 
-def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=False):
+def get_patch_size_in_microns(input_slide_path, patch_size_from_config, selected_level=0, verbose=False):
     """
     This function takes a slide path and a patch size in microns and returns the patch size in pixels.
 
     Args:
         input_slide_path (str): The input WSI path.
         patch_size_from_config (str): The patch size in microns.
+        selected_level (int): The level of the WSI to use.
         verbose (bool): Whether to provide verbose prints.
 
     Raises:
@@ -327,7 +328,9 @@ def get_patch_size_in_microns(input_slide_path, patch_size_from_config, verbose=
                         format(size_in_microns),
                     )
                 if magnification > 0:
-                    return_patch_size[i] = round(size_in_microns / magnification)
+                    return_patch_size[i] = round(size_in_microns / (magnification * (2**selected_level)))
+                    if return_patch_size[i] < 1:
+                        raise ValueError("Patch size in microns is too small for selected level")
                     magnification_prev = magnification
             else:
                 return_patch_size[i] = float(patch_size[i])
