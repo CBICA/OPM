@@ -1,5 +1,7 @@
 # OPM
 
+## THIS CODE IS NOW DEPRECATED IN FAVOR OF [github.com/mlcommons/GaNDLF](https://github.com/mlcommons/GaNDLF)
+
 <p align="center">
     <a href="https://pypi.org/project/OpenPatchMiner"><img src="https://img.shields.io/pypi/v/OpenPatchMiner"/></a>
     <a href="https://anaconda.org/conda-forge/openpatchminer"><img src="https://img.shields.io/conda/vn/conda-forge/openpatchminer.svg"/></a>
