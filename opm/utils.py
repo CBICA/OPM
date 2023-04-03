@@ -117,8 +117,8 @@ def tissue_mask(image):
 
 def basic_pen_mask(image, pen_size_threshold, pen_mask_expansion):
     green_mask = np.bitwise_and(
-        image[:, :, RGB_GREEN_CHANNEL] > image[:, :, RGB_GREEN_CHANNEL],
-        image[:, :, RGB_GREEN_CHANNEL] - image[:, :, RGB_GREEN_CHANNEL]
+        image[:, :, RGB_GREEN_CHANNEL] > image[:, :, RGB_BLUE_CHANNEL],
+        image[:, :, RGB_GREEN_CHANNEL] - image[:, :, RGB_BLUE_CHANNEL]
         > MIN_COLOR_DIFFERENCE,
     )
 
