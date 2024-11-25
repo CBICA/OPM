@@ -70,8 +70,8 @@ if __name__ == '__main__':
         if args.label_map_path is not None:
             manager.set_label_map(args.label_map_path)
         
-        ## trying to handle mpp
-        cfg['patch_size'] = get_patch_size_in_microns(slide_path, cfg['patch_size'], True)
+        ## handle mpp
+        cfg['patch_size'] = get_patch_size_in_microns(slide_path, cfg['patch_size'], cfg['scale'], True)
 
         # Reject patch if any pixels are transparent
         manager.add_patch_criteria(alpha_channel_check)
